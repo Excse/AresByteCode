@@ -10,6 +10,15 @@ namespace ares {
 
     class ClassWriter : Visitor {
 
+    private:
+        unsigned int m_Offset, m_Size;
+        uint8_t *m_ByteCode{};
+
+    public:
+        explicit ClassWriter(uint8_t *byteCode, unsigned int size, unsigned int offset = 0);
+
+        virtual ~ClassWriter();
+
     public:
         void visitClass(ClassFile &classFile) override;
 

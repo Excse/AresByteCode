@@ -4,8 +4,21 @@
 
 #include "classwriter.h"
 
-void ares::ClassWriter::visitClass(ares::ClassFile &classFile) {
+#include "../utils/utils.h"
 
+#include "../structure/constantinfo.h"
+
+ares::ClassWriter::ClassWriter(uint8_t *byteCode, unsigned int size, unsigned int offset)
+        : m_ByteCode(byteCode), m_Size(size),
+          m_Offset(offset) {}
+
+ares::ClassWriter::~ClassWriter() = default;
+
+void ares::ClassWriter::visitClass(ares::ClassFile &classFile) {
+    ares::writeU32(classFile.m_MagicNumber, m_ByteCode, m_Size, m_Offset);
+    ares::writeU16(classFile.m_MinorVersion, m_ByteCode, m_Size, m_Offset);
+    ares::writeU16(classFile.m_MajorVersion, m_ByteCode, m_Size, m_Offset);
+    ares::writeU16(classFile.m_ConstantPoolCount, m_ByteCode, m_Size, m_Offset);
 }
 
 void ares::ClassWriter::visitClassCPInfo(ares::ClassFile &classFile,

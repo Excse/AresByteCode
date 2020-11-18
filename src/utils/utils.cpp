@@ -78,6 +78,21 @@ int ares::readU32(uint32_t &data, const ClassFile &classFile, unsigned int &offs
     return EXIT_SUCCESS;
 }
 
+int ares::writeU32(uint32_t &data, uint8_t *bytes, unsigned int size, unsigned int &offset) {
+    if (offset + 4 > size) {
+        std::cerr << "Couldn't write u32 because it is out of bounds." << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    bytes[offset + 0] = (data >> 24) & 0xFF;
+    bytes[offset + 1] = (data >> 16) & 0xFF;
+    bytes[offset + 2] = (data >> 8) & 0xFF;
+    bytes[offset + 3] = data & 0xFF;
+    offset += 4;
+
+    return EXIT_SUCCESS;
+}
+
 int ares::readU16(uint16_t &data, const ares::ClassFile &classFile, unsigned int &offset) {
     if (offset + 2 > classFile.m_Size) {
         std::cerr << "Couldn't read u16 because it is out of bounds." << std::endl;
@@ -90,6 +105,19 @@ int ares::readU16(uint16_t &data, const ares::ClassFile &classFile, unsigned int
     return EXIT_SUCCESS;
 }
 
+int ares::writeU16(uint16_t &data, uint8_t *bytes, unsigned int size, unsigned int &offset) {
+    if (offset + 2 > size) {
+        std::cerr << "Couldn't write u16 because it is out of bounds." << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    bytes[offset + 0] = (data >> 8) & 0xFF;
+    bytes[offset + 1] = data & 0xFF;
+    offset += 2;
+
+    return EXIT_SUCCESS;
+}
+
 int ares::readU8(uint8_t &data, const ares::ClassFile &classFile, unsigned int &offset) {
     if (offset + 1 > classFile.m_Size) {
         std::cerr << "Couldn't read u8 because it is out of bounds." << std::endl;
@@ -97,6 +125,18 @@ int ares::readU8(uint8_t &data, const ares::ClassFile &classFile, unsigned int &
     }
 
     data = *(uint8_t *) (classFile.m_ByteCode + offset);
+    offset += 1;
+
+    return EXIT_SUCCESS;
+}
+
+int ares::writeU8(uint8_t &data, uint8_t *bytes, unsigned int size, unsigned int &offset) {
+    if (offset + 1 > size) {
+        std::cerr << "Couldn't write u8 because it is out of bounds." << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    bytes[offset] = data & 0xFF;
     offset += 1;
 
     return EXIT_SUCCESS;

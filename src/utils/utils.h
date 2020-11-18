@@ -16,12 +16,15 @@ namespace ares {
 
     int readU32(uint32_t &data, const ares::ClassFile &classFile, unsigned int &offset);
 
+    int writeU32(uint32_t &data, uint8_t *bytes, unsigned int size, unsigned int &offset);
+
     int readU16(uint16_t &data, const ares::ClassFile &classFile, unsigned int &offset);
 
-    int readU16Array(uint16_t *data, unsigned int size, const ares::ClassFile &classFile,
-                     unsigned int &offset);
+    int writeU16(uint16_t &data, uint8_t *bytes, unsigned int size, unsigned int &offset);
 
     int readU8(uint8_t &data, const ares::ClassFile &classFile, unsigned int &offset);
+
+    int writeU8(uint8_t &data, uint8_t *bytes, unsigned int size, unsigned int &offset);
 
     int readU8Array(uint8_t *data, unsigned int size, const ares::ClassFile &classFile,
                     unsigned int &offset);

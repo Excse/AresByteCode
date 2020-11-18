@@ -20,6 +20,12 @@ void ares::VMCheck::visitClass(ares::ClassFile &classFile) {
         abort();
     }
 
+    if (classFile.m_ClassVersion > ClassFile::VERSION_12
+        && (classFile.m_MinorVersion != 0 && classFile.m_MinorVersion != 65535)) {
+        std::cerr << "All Java 12 class files need a minor version of 0 or 65535." << std::endl;
+        abort();
+    }
+
     for (auto &constantPoolInfo : classFile.m_ConstantPool) {
         if (constantPoolInfo == nullptr)
             continue;
@@ -322,6 +328,16 @@ void ares::VMCheck::visitClassCPInfo(ares::ClassFile &classFile,
         case ConstantPoolInfo::PACKAGE:
             VMCheck::visitModulePackageInfo(classFile, constantPoolInfo.m_Info.modulePackageInfo);
             break;
+        case ConstantPoolInfo::UTF_8:
+        case ConstantPoolInfo::INTEGER:
+        case ConstantPoolInfo::FLOAT:
+        case ConstantPoolInfo::LONG:
+        case ConstantPoolInfo::DOUBLE:
+            break;
+        default:
+            std::cerr << "Case for constant pool tag \"" << (int) constantPoolInfo.m_Tag
+                      << "\" not implemented yet." << std::endl;
+            abort();
     }
 }
 

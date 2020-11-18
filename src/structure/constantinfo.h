@@ -71,17 +71,18 @@ namespace ares {
 
     public:
         enum ConstantTag : uint8_t {
-            CLASS = 7,
-            FIELD_REF = 9,
-            METHOD_REF = 10,
-            INTERFACE_METHOD_REF = 11,
-            STRING = 8,
+            UNDEFINED = 0,
+            UTF_8 = 1,
             INTEGER = 3,
             FLOAT = 4,
             LONG = 5,
             DOUBLE = 6,
+            CLASS = 7,
+            STRING = 8,
+            FIELD_REF = 9,
+            METHOD_REF = 10,
+            INTERFACE_METHOD_REF = 11,
             NAME_AND_TYPE = 12,
-            UTF_8 = 1,
             METHOD_HANDLE = 15,
             METHOD_TYPE = 16,
             DYNAMIC = 17,
@@ -92,7 +93,7 @@ namespace ares {
 
     public:
         ConstantInfo m_Info{};
-        uint8_t m_Tag{};
+        ConstantTag m_Tag{};
 
     public:
         ConstantPoolInfo();

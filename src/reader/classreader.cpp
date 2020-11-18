@@ -76,73 +76,22 @@ void ares::ClassReader::readMagicNumber(ClassFile &classFile) {
 }
 
 void ares::ClassReader::readClassVersion(ClassFile &classFile) {
-    uint16_t minorVersion = 0;
-    if (ares::readU16(minorVersion, classFile, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classFile.m_MinorVersion, classFile, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the minor version of the class file." << std::endl;
         abort();
     }
 
-    uint16_t majorVersion = 0;
-    if (ares::readU16(majorVersion, classFile, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classFile.m_MajorVersion, classFile, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the major version of the class file." << std::endl;
         abort();
     }
 
-    switch (majorVersion) {
-        case ClassFile::VERSION_1_1:
-            classFile.m_ClassVersion = ClassFile::VERSION_1_1;
-            break;
-        case ClassFile::VERSION_1_2:
-            classFile.m_ClassVersion = ClassFile::VERSION_1_2;
-            break;
-        case ClassFile::VERSION_1_3:
-            classFile.m_ClassVersion = ClassFile::VERSION_1_3;
-            break;
-        case ClassFile::VERSION_1_4:
-            classFile.m_ClassVersion = ClassFile::VERSION_1_4;
-            break;
-        case ClassFile::VERSION_5:
-            classFile.m_ClassVersion = ClassFile::VERSION_5;
-            break;
-        case ClassFile::VERSION_6:
-            classFile.m_ClassVersion = ClassFile::VERSION_6;
-            break;
-        case ClassFile::VERSION_7:
-            classFile.m_ClassVersion = ClassFile::VERSION_7;
-            break;
-        case ClassFile::VERSION_8:
-            classFile.m_ClassVersion = ClassFile::VERSION_8;
-            break;
-        case ClassFile::VERSION_9:
-            classFile.m_ClassVersion = ClassFile::VERSION_9;
-            break;
-        case ClassFile::VERSION_10:
-            classFile.m_ClassVersion = ClassFile::VERSION_10;
-            break;
-        case ClassFile::VERSION_11:
-            classFile.m_ClassVersion = ClassFile::VERSION_11;
-            break;
-        case ClassFile::VERSION_12:
-            classFile.m_ClassVersion = ClassFile::VERSION_12;
-            break;
-        case ClassFile::VERSION_13:
-            classFile.m_ClassVersion = ClassFile::VERSION_13;
-            break;
-        case ClassFile::VERSION_14:
-            classFile.m_ClassVersion = ClassFile::VERSION_14;
-            break;
-        case ClassFile::VERSION_15:
-            classFile.m_ClassVersion = ClassFile::VERSION_15;
-            break;
-        default:
-            classFile.m_ClassVersion = ClassFile::UNDEFINED;
-            break;
-    }
-
-    if (classFile.m_ClassVersion > ClassFile::VERSION_12
-        && (minorVersion != 0 && minorVersion != 65535)) {
-        std::cerr << "All Java 12 class files need a minor version of 0 or 65535." << std::endl;
-        abort();
+    classFile.m_ClassVersion = ClassFile::ClassVersion(classFile.m_MajorVersion);
+    if (classFile.m_MajorVersion >= ClassFile::VERSION_1_1
+        && classFile.m_MajorVersion <= ClassFile::VERSION_15) {
+        classFile.m_ClassVersion = ClassFile::ClassVersion(classFile.m_MajorVersion);
+    } else {
+        classFile.m_ClassVersion = ClassFile::UNDEFINED;
     }
 }
 
@@ -167,11 +116,18 @@ void ares::ClassReader::readConstantPool(ClassFile &classFile) {
 
 void ares::ClassReader::visitClassCPInfo(ares::ClassFile &classFile,
                                          ares::ConstantPoolInfo &info) {
-    if (ares::readU8(info.m_Tag, classFile, m_Offset) == EXIT_FAILURE) {
+    uint8_t infoTag = 0;
+    if (ares::readU8(infoTag, classFile, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the tag of the constant pool info of this class file"
                   << std::endl;
         abort();
     }
+
+    if (infoTag >= ConstantPoolInfo::UTF_8 && infoTag <= ConstantPoolInfo::PACKAGE
+        && infoTag != 13 && infoTag != 14)
+        info.m_Tag = ConstantPoolInfo::ConstantTag(infoTag);
+    else
+        info.m_Tag = ConstantPoolInfo::UNDEFINED;
 
     switch (info.m_Tag) {
         case ConstantPoolInfo::CLASS:
@@ -214,9 +170,7 @@ void ares::ClassReader::visitClassCPInfo(ares::ClassFile &classFile,
             readModulePackage(classFile, info.m_Info.modulePackageInfo);
             break;
         default:
-            std::cerr << "Case for constant pool tag \"" << (int) info.m_Tag
-                      << "\" not implemented yet." << std::endl;
-            abort();
+            break;
     }
 }
 

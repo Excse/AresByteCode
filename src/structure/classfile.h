@@ -61,6 +61,8 @@ namespace ares {
         unsigned int m_Size{};
 
         uint32_t m_MagicNumber{};
+        uint16_t m_MinorVersion{};
+        uint16_t m_MajorVersion{};
         ClassVersion m_ClassVersion{};
         uint16_t m_ConstantPoolCount{};
         std::vector <std::shared_ptr<ConstantPoolInfo>> m_ConstantPool{};
