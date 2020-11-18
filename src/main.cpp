@@ -14,7 +14,7 @@ int main() {
 
     ares::VMCheck vmCheck;
     for (const auto &classFile :configuration.m_Classes)
-        vmCheck.visitClass(classFile.second.get());
+        vmCheck.visitClass(*classFile.second);
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);

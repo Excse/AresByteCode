@@ -10,28 +10,32 @@ namespace ares {
 
     class ClassWriter : Visitor {
 
-        void visitClass(const ClassFile *classFile) const override;
+    public:
+        void visitClass(ClassFile &classFile) override;
 
-        void visitClassCPInfo(const ClassFile *classFile,
-                              const ConstantPoolInfo *constantPoolInfo) const override;
+    private:
+        void visitClassCPInfo(ares::ClassFile &classFile,
+                              ares::ConstantPoolInfo &constantPoolInfo) override;
 
-        void visitClassInterface(const ClassFile *classFile,
-                                 uint16_t interface) const override;
+        void visitClassInterface(ares::ClassFile &classFile,
+                                 uint16_t interface) override;
 
-        void visitClassField(const ClassFile *classFile,
-                             const FieldInfo *fieldInfo) const override;
+        void visitClassField(ares::ClassFile &classFile,
+                             ares::FieldInfo &fieldInfo) override;
 
-        void visitClassMethod(const ClassFile *classFile,
-                              const MethodInfo *methodInfo) const override;
+        void visitClassMethod(ares::ClassFile &classFile,
+                              ares::MethodInfo &methodInfo) override;
 
-        void visitClassAttribute(const ClassFile *classFile,
-                                 const AttributeInfo *attributeInfo) const override;
+        void visitClassAttribute(ares::ClassFile &classFile,
+                                 ares::AttributeInfo &attributeInfo) override;
 
-        void visitFieldAttribute(const ClassFile *classFile, const FieldInfo *fieldInfo,
-                                 const AttributeInfo *attributeInfo) const override;
+        void visitFieldAttribute(ares::ClassFile &classFile,
+                                 ares::FieldInfo &fieldInfo,
+                                 ares::AttributeInfo &attributeInfo) override;
 
-        void visitMethodAttribute(const ClassFile *classFile, const MethodInfo *methodInfo,
-                                  const AttributeInfo *attributeInfo) const override;
+        void visitMethodAttribute(ares::ClassFile &classFile,
+                                  ares::MethodInfo &methodInfo,
+                                  ares::AttributeInfo &attributeInfo) override;
 
     };
 

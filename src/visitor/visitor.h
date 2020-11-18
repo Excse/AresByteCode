@@ -14,30 +14,30 @@ namespace ares {
     class Visitor {
 
     public:
-        virtual void visitClass(const ClassFile *classFile) const = 0;
+        virtual void visitClass(ClassFile &classFile) = 0;
 
-        virtual void visitClassCPInfo(const ClassFile *classFile,
-                                      const ConstantPoolInfo *constantPoolInfo) const = 0;
+        virtual void visitClassCPInfo(ClassFile &classFile,
+                                      ConstantPoolInfo &constantPoolInfo) = 0;
 
-        virtual void visitClassInterface(const ClassFile *classFile,
-                                         uint16_t interface) const = 0;
+        virtual void visitClassInterface(ClassFile &classFile,
+                                         uint16_t interface) = 0;
 
-        virtual void visitClassField(const ClassFile *classFile,
-                                     const FieldInfo *fieldInfo) const = 0;
+        virtual void visitClassField(ClassFile &classFile,
+                                     FieldInfo &fieldInfo) = 0;
 
-        virtual void visitClassMethod(const ClassFile *classFile,
-                                      const MethodInfo *methodInfo) const = 0;
+        virtual void visitClassMethod(ClassFile &classFile,
+                                      MethodInfo &methodInfo) = 0;
 
-        virtual void visitClassAttribute(const ClassFile *classFile,
-                                         const AttributeInfo *attributeInfo) const = 0;
+        virtual void visitClassAttribute(ClassFile &classFile,
+                                         AttributeInfo &attributeInfo) = 0;
 
-        virtual void visitFieldAttribute(const ClassFile *classFile,
-                                         const FieldInfo *fieldInfo,
-                                         const AttributeInfo *attributeInfo) const = 0;
+        virtual void visitFieldAttribute(ClassFile &classFile,
+                                         FieldInfo &fieldInfo,
+                                         AttributeInfo &attributeInfo) = 0;
 
-        virtual void visitMethodAttribute(const ClassFile *classFile,
-                                          const MethodInfo *methodInfo,
-                                          const AttributeInfo *attributeInfo) const = 0;
+        virtual void visitMethodAttribute(ClassFile &classFile,
+                                          MethodInfo &methodInfo,
+                                          AttributeInfo &attributeInfo) = 0;
 
     };
 

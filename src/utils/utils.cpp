@@ -48,11 +48,10 @@ int ares::readJarFile(const std::string &path, ares::AresConfiguration &configur
         } else if (name.find(".class", name.size() - 6) != -1) {
             configuration.m_Classes.emplace(name, jarFile);
 
-            auto offset = 0u;
-            if (ClassReader::readClass(*jarFile, offset) == EXIT_FAILURE)
-                return EXIT_FAILURE;
+            ClassReader classReader;
+            classReader.visitClass(*jarFile);
 
-            if (offset != jarFile->m_Size) {
+            if (classReader.getOffset() != jarFile->m_Size) {
                 std::cerr << "The offset after reading the class doesn't match the class size"
                           << std::endl;
                 return EXIT_FAILURE;

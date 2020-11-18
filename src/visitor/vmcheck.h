@@ -13,52 +13,54 @@ namespace ares {
     class VMCheck : Visitor {
 
     public:
-        void visitClass(const ClassFile *classFile) const override;
+        void visitClass(ares::ClassFile &classFile) override;
 
-        void visitClassCPInfo(const ClassFile *classFile,
-                              const ConstantPoolInfo *constantPoolInfo) const override;
+        void visitClassCPInfo(ares::ClassFile &classFile,
+                              ares::ConstantPoolInfo &constantPoolInfo) override;
 
-        void visitClassInterface(const ClassFile *classFile,
-                                 uint16_t interface) const override;
+        void visitClassInterface(ares::ClassFile &classFile,
+                                 uint16_t interface) override;
 
-        void visitClassField(const ClassFile *classFile,
-                             const FieldInfo *fieldInfo) const override;
+        void visitClassField(ares::ClassFile &classFile,
+                             ares::FieldInfo &fieldInfo) override;
 
-        void visitClassMethod(const ClassFile *classFile,
-                              const MethodInfo *methodInfo) const override;
+        void visitClassMethod(ares::ClassFile &classFile,
+                              ares::MethodInfo &methodInfo) override;
 
-        void visitClassAttribute(const ClassFile *classFile,
-                                 const AttributeInfo *attributeInfo) const override;
+        void visitClassAttribute(ares::ClassFile &classFile,
+                                 ares::AttributeInfo &attributeInfo) override;
 
-        void visitFieldAttribute(const ClassFile *classFile, const FieldInfo *fieldInfo,
-                                 const AttributeInfo *attributeInfo) const override;
+        void visitFieldAttribute(ares::ClassFile &classFile,
+                                 ares::FieldInfo &fieldInfo,
+                                 ares::AttributeInfo &attributeInfo) override;
 
-        void visitMethodAttribute(const ClassFile *classFile, const MethodInfo *methodInfo,
-                                  const AttributeInfo *attributeInfo) const override;
+        void visitMethodAttribute(ares::ClassFile &classFile,
+                                  ares::MethodInfo &methodInfo,
+                                  ares::AttributeInfo &attributeInfo) override;
 
-        static void visitClassInfo(const ClassFile *classFile,
-                                   const ConstantInfo::ClassInfo *info);
+        static void visitClassInfo(ares::ClassFile &classFile,
+                                   ares::ConstantInfo::ClassInfo &info);
 
-        static void visitFieldMethodInfo(const ClassFile *classFile,
-                                         const ConstantInfo::FieldMethodInfo *info);
+        static void visitFieldMethodInfo(ares::ClassFile &classFile,
+                                         ares::ConstantInfo::FieldMethodInfo &info);
 
-        static void visitNameAndTypeInfo(const ClassFile *classFile,
-                                         const ConstantInfo::NameAndTypeInfo *info);
+        static void visitNameAndTypeInfo(ares::ClassFile &classFile,
+                                         ares::ConstantInfo::NameAndTypeInfo &info);
 
-        static void visitStringInfo(const ClassFile *classFile,
-                                    const ConstantInfo::StringInfo *info);
+        static void visitStringInfo(ares::ClassFile &classFile,
+                                    ares::ConstantInfo::StringInfo &info);
 
-        static void visitMethodTypeInfo(const ClassFile *classFile,
-                                        const ConstantInfo::MethodTypeInfo *info);
+        static void visitMethodTypeInfo(ares::ClassFile &classFile,
+                                        ares::ConstantInfo::MethodTypeInfo &info);
 
-        static void visitMethodHandleInfo(const ClassFile *classFile,
-                                          const ConstantInfo::MethodHandleInfo *info);
+        static void visitMethodHandleInfo(ares::ClassFile &classFile,
+                                          ares::ConstantInfo::MethodHandleInfo &info);
 
-        static void visitDynamicInfo(const ClassFile *classFile,
-                                     const ConstantInfo::DynamicInfo *info);
+        static void visitDynamicInfo(ares::ClassFile &classFile,
+                                     ares::ConstantInfo::DynamicInfo &info);
 
-        static void visitModulePackageInfo(const ClassFile *classFile,
-                                           const ConstantInfo::ModulePackageInfo *info);
+        static void visitModulePackageInfo(ares::ClassFile &classFile,
+                                           ares::ConstantInfo::ModulePackageInfo &info);
 
     };
 

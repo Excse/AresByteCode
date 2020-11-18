@@ -14,6 +14,7 @@
 #include "../structure/attributeinfo.h"
 #include "../structure/constantinfo.h"
 #include "../structure/classfile.h"
+#include "../visitor/visitor.h"
 
 namespace ares {
 
@@ -31,66 +32,103 @@ namespace ares {
 
     };
 
-    class ClassReader {
-
-    public:
-        static int readClass(ClassFile &classFile, unsigned int &offset);
+    class ClassReader : Visitor {
 
     private:
-        static int readMagicNumber(ClassFile &classFile, unsigned int &offset);
+        unsigned int m_Offset;
 
-        static int readClassVersion(ClassFile &classFile, unsigned int &offset);
+    public:
+        explicit ClassReader(unsigned int offset = 0u);
 
-        static int readConstantPool(ClassFile &classFile, unsigned int &offset);
+        virtual ~ClassReader();
 
-        static int readAccessFlags(ClassFile &classFile, unsigned int &offset);
+    public:
+        void visitClass(ares::ClassFile &classFile) override;
 
-        static int readThisClass(ClassFile &classFile, unsigned int &offset);
+    private:
+        void readClassAttributes(ClassFile &classFile);
 
-        static int readSuperClass(ClassFile &classFile, unsigned int &offset);
+        void visitClassAttribute(ares::ClassFile &classFile,
+                                 ares::AttributeInfo &attributeInfo) override;
 
-        static int readInterfaces(ClassFile &classFile, unsigned int &offset);
+        void readMagicNumber(ares::ClassFile &classFile);
 
-        static int readFields(ClassFile &classFile, unsigned int &offset);
+        void readClassVersion(ares::ClassFile &classFile);
 
-        static int readAttributes(ClassFile &classFile, uint16_t &attributeCount,
-                                  std::vector<std::shared_ptr<AttributeInfo>> &attributes,
-                                  unsigned int &offset);
+        void readConstantPool(ares::ClassFile &classFile);
 
-        static int readMethods(ClassFile &classFile, unsigned int &offset);
+        void visitClassCPInfo(ares::ClassFile &classFile,
+                              ares::ConstantPoolInfo &info) override;
 
-        static int readClassInfo(ClassFile &classFile, ConstantInfo::ClassInfo &info,
-                                 unsigned int &offset);
+        void readClassInfo(ares::ClassFile &classFile,
+                           ConstantInfo::ClassInfo &info);
 
-        static int readUTF8Info(ClassFile &classFile, ConstantInfo::UTF8Info &info,
-                                unsigned int &offset);
+        void readUTF8Info(ares::ClassFile &classFile,
+                          ConstantInfo::UTF8Info &info);
 
-        static int readFieldMethodInfo(ClassFile &classFile, ConstantInfo::FieldMethodInfo &info,
-                                       unsigned int &offset);
+        void readFieldMethodInfo(ares::ClassFile &classFile,
+                                 ConstantInfo::FieldMethodInfo &info);
 
-        static int readNameAndType(ClassFile &classFile, ConstantInfo::NameAndTypeInfo &info,
-                                   unsigned int &offset);
+        void readNameAndType(ares::ClassFile &classFile,
+                             ConstantInfo::NameAndTypeInfo &info);
 
-        static int readStringInfo(ClassFile &classFile, ConstantInfo::StringInfo &info,
-                                  unsigned int &offset);
+        void readStringInfo(ares::ClassFile &classFile,
+                            ConstantInfo::StringInfo &info);
 
-        static int readDoubleLong(ClassFile &classFile, ConstantInfo::DoubleLongInfo &info,
-                                  unsigned int &offset);
+        void readDoubleLong(ares::ClassFile &classFile,
+                            ConstantInfo::DoubleLongInfo &info);
 
-        static int readFloatInteger(ClassFile &classFile, ConstantInfo::FloatIntegerInfo &info,
-                                    unsigned int &offset);
+        void readFloatInteger(ares::ClassFile &classFile,
+                              ConstantInfo::FloatIntegerInfo &info);
 
-        static int readMethodType(ClassFile &classFile, ConstantInfo::MethodTypeInfo &info,
-                                  unsigned int &offset);
+        void readMethodType(ares::ClassFile &classFile,
+                            ConstantInfo::MethodTypeInfo &info);
 
-        static int readMethodHandle(ClassFile &classFile, ConstantInfo::MethodHandleInfo &info,
-                                    unsigned int &offset);
+        void readMethodHandle(ares::ClassFile &classFile,
+                              ConstantInfo::MethodHandleInfo &info);
 
-        static int readDynamic(ClassFile &classFile, ConstantInfo::DynamicInfo &info,
-                               unsigned int &offset);
+        void readDynamic(ares::ClassFile &classFile,
+                         ConstantInfo::DynamicInfo &info);
 
-        static int readModulePackage(ClassFile &classFile, ConstantInfo::ModulePackageInfo &info,
-                                     unsigned int &offset);
+        void readModulePackage(ares::ClassFile &classFile,
+                               ConstantInfo::ModulePackageInfo &info);
+
+        void readAccessFlags(ClassFile &classFile);
+
+        void readThisClass(ClassFile &classFile);
+
+        void readSuperClass(ClassFile &classFile);
+
+        void readInterfaces(ClassFile &classFile);
+
+        void visitClassInterface(ClassFile &classFile,
+                                 uint16_t interface) override;
+
+        void readFields(ClassFile &classFile);
+
+        void visitClassField(ares::ClassFile &classFile,
+                             ares::FieldInfo &fieldInfo) override;
+
+        void readFieldAttributes(ClassFile &classFile, FieldInfo &fieldInfo);
+
+        void visitFieldAttribute(ares::ClassFile &classFile,
+                                 ares::FieldInfo &fieldInfo,
+                                 ares::AttributeInfo &attributeInfo) override;
+
+        void readMethods(ClassFile &classFile);
+
+        void visitClassMethod(ares::ClassFile &classFile,
+                              ares::MethodInfo &methodInfo) override;
+
+        void readMethodAttributes(ClassFile &classFile, MethodInfo &methodInfo);
+
+        void visitMethodAttribute(ares::ClassFile &classFile,
+                                  ares::MethodInfo &methodInfo,
+                                  ares::AttributeInfo &attributeInfo) override;
+
+    public:
+        [[nodiscard]]
+        unsigned int getOffset() const;
 
     };
 
