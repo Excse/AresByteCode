@@ -11,16 +11,18 @@ namespace ares {
     class ClassWriter : Visitor {
 
     private:
-        unsigned int m_Offset, m_Size;
-        uint8_t *m_ByteCode{};
+        std::vector<uint8_t> m_ByteCode{};
+        unsigned int m_Offset;
 
     public:
-        explicit ClassWriter(uint8_t *byteCode, unsigned int size, unsigned int offset = 0);
+        explicit ClassWriter(unsigned int size = 0, unsigned int offset = 0);
 
         virtual ~ClassWriter();
 
     public:
         void visitClass(ClassFile &classFile) override;
+
+        void getByteCode(std::vector<uint8_t> &byteCode);
 
     private:
         void visitClassCPInfo(ares::ClassFile &classFile,

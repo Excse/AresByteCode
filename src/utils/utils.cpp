@@ -9,7 +9,6 @@
 #include <zip.h>
 
 #include "../reader/classreader.h"
-#include "../structure/classfile.h"
 
 int ares::readJarFile(const std::string &path, ares::AresConfiguration &configuration) {
     auto correctSuffix = path.find(".jar", path.size() - 4) != -1;
@@ -78,16 +77,14 @@ int ares::readU32(uint32_t &data, const ClassFile &classFile, unsigned int &offs
     return EXIT_SUCCESS;
 }
 
-int ares::writeU32(uint32_t &data, uint8_t *bytes, unsigned int size, unsigned int &offset) {
-    if (offset + 4 > size) {
-        std::cerr << "Couldn't write u32 because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
-    }
+int ares::writeU32(uint32_t &data, std::vector<uint8_t> &byteCode, unsigned int &offset) {
+    if (offset + 4 > byteCode.size())
+        byteCode.resize(offset + 4);
 
-    bytes[offset + 0] = (data >> 24) & 0xFF;
-    bytes[offset + 1] = (data >> 16) & 0xFF;
-    bytes[offset + 2] = (data >> 8) & 0xFF;
-    bytes[offset + 3] = data & 0xFF;
+    byteCode[offset + 0] = (data >> 24) & 0xFF;
+    byteCode[offset + 1] = (data >> 16) & 0xFF;
+    byteCode[offset + 2] = (data >> 8) & 0xFF;
+    byteCode[offset + 3] = data & 0xFF;
     offset += 4;
 
     return EXIT_SUCCESS;
@@ -105,14 +102,12 @@ int ares::readU16(uint16_t &data, const ares::ClassFile &classFile, unsigned int
     return EXIT_SUCCESS;
 }
 
-int ares::writeU16(uint16_t &data, uint8_t *bytes, unsigned int size, unsigned int &offset) {
-    if (offset + 2 > size) {
-        std::cerr << "Couldn't write u16 because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
-    }
+int ares::writeU16(uint16_t &data, std::vector<uint8_t> &byteCode, unsigned int &offset) {
+    if (offset + 2 > byteCode.size())
+        byteCode.resize(offset + 2);
 
-    bytes[offset + 0] = (data >> 8) & 0xFF;
-    bytes[offset + 1] = data & 0xFF;
+    byteCode[offset + 0] = (data >> 8) & 0xFF;
+    byteCode[offset + 1] = data & 0xFF;
     offset += 2;
 
     return EXIT_SUCCESS;
@@ -130,13 +125,11 @@ int ares::readU8(uint8_t &data, const ares::ClassFile &classFile, unsigned int &
     return EXIT_SUCCESS;
 }
 
-int ares::writeU8(uint8_t &data, uint8_t *bytes, unsigned int size, unsigned int &offset) {
-    if (offset + 1 > size) {
-        std::cerr << "Couldn't write u8 because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
-    }
+int ares::writeU8(uint8_t &data, std::vector<uint8_t> &byteCode, unsigned int &offset) {
+    if (offset + 1 > byteCode.size())
+        byteCode.resize(offset + 1);
 
-    bytes[offset] = data & 0xFF;
+    byteCode[offset] = data & 0xFF;
     offset += 1;
 
     return EXIT_SUCCESS;
@@ -155,15 +148,13 @@ int ares::readU8Array(uint8_t *data, unsigned int size, const ares::ClassFile &c
     return EXIT_SUCCESS;
 }
 
-int ares::writeU8Array(uint8_t *data, unsigned int dataSize, uint8_t *bytes,
-                       unsigned int bytesSize, unsigned int &offset) {
-    if (offset + (dataSize * 1) > bytesSize) {
-        std::cerr << "Couldn't write the u8 array because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
-    }
+int ares::writeU8Array(uint8_t *data, unsigned int dataSize, std::vector<uint8_t> &byteCode,
+                       unsigned int &offset) {
+    if (offset + (dataSize * 1) > byteCode.size())
+        byteCode.resize(offset + (dataSize * 1));
 
     for (auto index = 0; index < dataSize; index++)
-        writeU8(data[index], bytes, bytesSize, offset);
+        writeU8(data[index], byteCode, offset);
 
     return EXIT_SUCCESS;
 }

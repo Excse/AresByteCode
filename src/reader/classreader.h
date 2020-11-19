@@ -35,7 +35,7 @@ namespace ares {
     class ClassReader : Visitor {
 
     private:
-        unsigned int m_Offset;
+        unsigned int m_Offset{};
 
     public:
         explicit ClassReader(unsigned int offset = 0u);
