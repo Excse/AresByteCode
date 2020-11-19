@@ -145,12 +145,25 @@ int ares::writeU8(uint8_t &data, uint8_t *bytes, unsigned int size, unsigned int
 int ares::readU8Array(uint8_t *data, unsigned int size, const ares::ClassFile &classFile,
                       unsigned int &offset) {
     if (offset + (size * 1) > classFile.m_Size) {
-        std::cerr << "Couldn't read u8 array because it is out of bounds." << std::endl;
+        std::cerr << "Couldn't read the u8 array because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
     }
 
     for (auto index = 0; index < size; index++)
         readU8(data[index], classFile, offset);
+
+    return EXIT_SUCCESS;
+}
+
+int ares::writeU8Array(uint8_t *data, unsigned int dataSize, uint8_t *bytes,
+                       unsigned int bytesSize, unsigned int &offset) {
+    if (offset + (dataSize * 1) > bytesSize) {
+        std::cerr << "Couldn't write the u8 array because it is out of bounds." << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    for (auto index = 0; index < dataSize; index++)
+        writeU8(data[index], bytes, bytesSize, offset);
 
     return EXIT_SUCCESS;
 }

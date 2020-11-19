@@ -29,4 +29,7 @@ namespace ares {
     int readU8Array(uint8_t *data, unsigned int size, const ares::ClassFile &classFile,
                     unsigned int &offset);
 
+    int writeU8Array(uint8_t *data, unsigned int dataSize, uint8_t *bytes,
+                     unsigned int bytesSize, unsigned int &offset);
+
 }

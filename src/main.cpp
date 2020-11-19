@@ -7,6 +7,17 @@
 #include "utils/utils.h"
 #include "writer/classwriter.h"
 
+int noMatchIndex(const uint8_t *firstData, unsigned int firstLength,
+                 const uint8_t *secondData, unsigned int secondLength) {
+    auto index = 0;
+    for (; index < std::min(firstLength, secondLength); index++) {
+        if (firstData[index] != secondData[index])
+            break;
+    }
+
+    return index;
+}
+
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -22,15 +33,9 @@ int main() {
         ares::ClassWriter classWriter(byteCode, classFile.second->m_Size);
         classWriter.visitClass(*classFile.second);
 
-        std::cout << "Original: " << std::endl;
-        for(int index = 0; index < 20; index++)
-            std::cout << (int) classFile.second->m_ByteCode[index] << ", ";
-        std::cout << std::endl;
-
-        std::cout << "New: " << std::endl;
-        for(int index = 0; index < 20; index++)
-            std::cout << (int) byteCode[index] << ", ";
-        std::cout << std::endl;
+        int index = noMatchIndex(classFile.second->m_ByteCode, classFile.second->m_Size,
+                                 byteCode, classFile.second->m_Size);
+        std::cout << index << " -> " << classFile.second->m_Size << std::endl;
 
         delete[] byteCode;
     }

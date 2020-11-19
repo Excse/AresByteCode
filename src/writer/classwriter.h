@@ -24,7 +24,7 @@ namespace ares {
 
     private:
         void visitClassCPInfo(ares::ClassFile &classFile,
-                              ares::ConstantPoolInfo &constantPoolInfo) override;
+                              ares::ConstantPoolInfo &info) override;
 
         void visitClassInterface(ares::ClassFile &classFile,
                                  uint16_t interface) override;
