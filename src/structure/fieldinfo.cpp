@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#include "classfile.h"
+#include "classinfo.h"
 #include "../utils/utils.h"
 
 ares::FieldInfo::FieldInfo() = default;

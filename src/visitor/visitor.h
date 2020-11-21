@@ -7,35 +7,35 @@
 #include "../structure/attributeinfo.h"
 #include "../structure/methodinfo.h"
 #include "../structure/fieldinfo.h"
-#include "../structure/classfile.h"
+#include "../structure/classinfo.h"
 
 namespace ares {
 
     class Visitor {
 
     public:
-        virtual void visitClass(ClassFile &classFile) = 0;
+        virtual void visitClass(ClassInfo &classFile) = 0;
 
-        virtual void visitClassCPInfo(ClassFile &classFile,
+        virtual void visitClassCPInfo(ClassInfo &classFile,
                                       ConstantPoolInfo &constantPoolInfo) = 0;
 
-        virtual void visitClassInterface(ClassFile &classFile,
+        virtual void visitClassInterface(ClassInfo &classFile,
                                          uint16_t interface) = 0;
 
-        virtual void visitClassField(ClassFile &classFile,
+        virtual void visitClassField(ClassInfo &classFile,
                                      FieldInfo &fieldInfo) = 0;
 
-        virtual void visitClassMethod(ClassFile &classFile,
+        virtual void visitClassMethod(ClassInfo &classFile,
                                       MethodInfo &methodInfo) = 0;
 
-        virtual void visitClassAttribute(ClassFile &classFile,
+        virtual void visitClassAttribute(ClassInfo &classFile,
                                          AttributeInfo &attributeInfo) = 0;
 
-        virtual void visitFieldAttribute(ClassFile &classFile,
+        virtual void visitFieldAttribute(ClassInfo &classFile,
                                          FieldInfo &fieldInfo,
                                          AttributeInfo &attributeInfo) = 0;
 
-        virtual void visitMethodAttribute(ClassFile &classFile,
+        virtual void visitMethodAttribute(ClassInfo &classFile,
                                           MethodInfo &methodInfo,
                                           AttributeInfo &attributeInfo) = 0;
 

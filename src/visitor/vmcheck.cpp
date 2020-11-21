@@ -8,19 +8,19 @@
 
 #include <iostream>
 
-void ares::VMCheck::visitClass(ares::ClassFile &classFile) {
+void ares::VMCheck::visitClass(ares::ClassInfo &classFile) {
     if (classFile.m_MagicNumber != 0xCAFEBABE) {
         std::cerr << "The magic number doesn't match \"0xCAFEBABE\"." << std::endl;
         abort();
     }
 
-    if (classFile.m_ClassVersion == ClassFile::UNDEFINED) {
+    if (classFile.m_ClassVersion == ClassInfo::UNDEFINED) {
         std::cerr << "Couldn't set the class file version because it is an undefined value."
                   << std::endl;
         abort();
     }
 
-    if (classFile.m_ClassVersion > ClassFile::VERSION_12
+    if (classFile.m_ClassVersion > ClassInfo::VERSION_12
         && (classFile.m_MinorVersion != 0 && classFile.m_MinorVersion != 65535)) {
         std::cerr << "All Java 12 class files need a minor version of 0 or 65535." << std::endl;
         abort();
@@ -33,25 +33,25 @@ void ares::VMCheck::visitClass(ares::ClassFile &classFile) {
         VMCheck::visitClassCPInfo(classFile, *constantPoolInfo);
     }
 
-    if (classFile.hasAccessFlag(ClassFile::INTERFACE)) {
-        if (!classFile.hasAccessFlag(ClassFile::ABSTRACT)
-            || classFile.hasAccessFlag(ClassFile::FINAL)
-            || classFile.hasAccessFlag(ClassFile::SUPER)
-            || classFile.hasAccessFlag(ClassFile::ENUM)
-            || classFile.hasAccessFlag(ClassFile::MODULE)) {
+    if (classFile.hasAccessFlag(ClassInfo::INTERFACE)) {
+        if (!classFile.hasAccessFlag(ClassInfo::ABSTRACT)
+            || classFile.hasAccessFlag(ClassInfo::FINAL)
+            || classFile.hasAccessFlag(ClassInfo::SUPER)
+            || classFile.hasAccessFlag(ClassInfo::ENUM)
+            || classFile.hasAccessFlag(ClassInfo::MODULE)) {
             std::cerr << "The class file has invalid interface access flags." << std::endl;
             abort();
         }
-    } else if (classFile.hasAccessFlag(ClassFile::ANNOTATION)) {
-        if (!classFile.hasAccessFlag(ClassFile::INTERFACE)
-            || classFile.hasAccessFlag(ClassFile::ABSTRACT)
-            || classFile.hasAccessFlag(ClassFile::FINAL)) {
+    } else if (classFile.hasAccessFlag(ClassInfo::ANNOTATION)) {
+        if (!classFile.hasAccessFlag(ClassInfo::INTERFACE)
+            || classFile.hasAccessFlag(ClassInfo::ABSTRACT)
+            || classFile.hasAccessFlag(ClassInfo::FINAL)) {
             std::cerr << "The class file has invalid annotation access flags." << std::endl;
             abort();
         }
-    } else if (classFile.hasAccessFlag(ClassFile::MODULE)) {
-        if (classFile.hasAccessFlag(ClassFile::ABSTRACT)
-            || classFile.hasAccessFlag(ClassFile::FINAL)) {
+    } else if (classFile.hasAccessFlag(ClassInfo::MODULE)) {
+        if (classFile.hasAccessFlag(ClassInfo::ABSTRACT)
+            || classFile.hasAccessFlag(ClassInfo::FINAL)) {
             std::cerr << "The class file has invalid module access flags." << std::endl;
             abort();
         }
@@ -95,7 +95,7 @@ void ares::VMCheck::visitClass(ares::ClassFile &classFile) {
         VMCheck::visitClassAttribute(classFile, *attribute);
 }
 
-void ares::VMCheck::visitClassInterface(ares::ClassFile &classFile,
+void ares::VMCheck::visitClassInterface(ares::ClassInfo &classFile,
                                         uint16_t interface) {
     if (!classFile.isIndexValid(interface)) {
         std::cerr << "The interface index is not a valid constant pool index." << std::endl;
@@ -109,7 +109,7 @@ void ares::VMCheck::visitClassInterface(ares::ClassFile &classFile,
     }
 }
 
-void ares::VMCheck::visitClassField(ares::ClassFile &classFile,
+void ares::VMCheck::visitClassField(ares::ClassInfo &classFile,
                                     ares::FieldInfo &fieldInfo) {
     if (fieldInfo.hasAccessFlag(FieldInfo::PUBLIC)) {
         if (fieldInfo.hasAccessFlag(FieldInfo::PRIVATE)
@@ -131,7 +131,7 @@ void ares::VMCheck::visitClassField(ares::ClassFile &classFile,
         }
     }
 
-    if (classFile.hasAccessFlag(ClassFile::INTERFACE)) {
+    if (classFile.hasAccessFlag(ClassInfo::INTERFACE)) {
         if (!fieldInfo.hasAccessFlag(FieldInfo::PUBLIC)
             || !fieldInfo.hasAccessFlag(FieldInfo::STATIC)
             || !fieldInfo.hasAccessFlag(FieldInfo::FINAL)) {
@@ -169,7 +169,7 @@ void ares::VMCheck::visitClassField(ares::ClassFile &classFile,
 
 // TODO: Do checks for the descriptor_index in
 //  https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.6
-void ares::VMCheck::visitClassMethod(ares::ClassFile &classFile,
+void ares::VMCheck::visitClassMethod(ares::ClassInfo &classFile,
                                      ares::MethodInfo &methodInfo) {
     if (methodInfo.hasAccessFlag(MethodInfo::PUBLIC)) {
         if (methodInfo.hasAccessFlag(MethodInfo::PRIVATE)
@@ -191,7 +191,7 @@ void ares::VMCheck::visitClassMethod(ares::ClassFile &classFile,
         }
     }
 
-    if (classFile.hasAccessFlag(ClassFile::INTERFACE)) {
+    if (classFile.hasAccessFlag(ClassInfo::INTERFACE)) {
         if (methodInfo.hasAccessFlag(MethodInfo::PROTECTED)
             || methodInfo.hasAccessFlag(MethodInfo::FINAL)
             || methodInfo.hasAccessFlag(MethodInfo::SYNCHRONIZED)
@@ -200,14 +200,14 @@ void ares::VMCheck::visitClassMethod(ares::ClassFile &classFile,
             abort();
         }
 
-        if (classFile.m_ClassVersion < ClassFile::VERSION_8) {
+        if (classFile.m_ClassVersion < ClassInfo::VERSION_8) {
             if (!methodInfo.hasAccessFlag(MethodInfo::PUBLIC)
                 || !methodInfo.hasAccessFlag(MethodInfo::ABSTRACT)) {
                 std::cerr << "The access flags for an interface methods are invalid."
                           << std::endl;
                 abort();
             }
-        } else if (classFile.m_ClassVersion >= ClassFile::VERSION_8) {
+        } else if (classFile.m_ClassVersion >= ClassInfo::VERSION_8) {
             if (methodInfo.hasAccessFlag(MethodInfo::PUBLIC)
                 && methodInfo.hasAccessFlag(MethodInfo::PRIVATE)) {
                 std::cerr << "The access flags for an interface methods are invalid."
@@ -271,7 +271,7 @@ void ares::VMCheck::visitClassMethod(ares::ClassFile &classFile,
         VMCheck::visitMethodAttribute(classFile, methodInfo, *attribute);
 }
 
-void ares::VMCheck::visitClassAttribute(ares::ClassFile &classFile,
+void ares::VMCheck::visitClassAttribute(ares::ClassInfo &classFile,
                                         ares::AttributeInfo &attributeInfo) {
     if (!classFile.isIndexValid(attributeInfo.m_AttributeNameIndex)) {
         std::cerr << "The name index is not a valid constant pool index." << std::endl;
@@ -285,19 +285,19 @@ void ares::VMCheck::visitClassAttribute(ares::ClassFile &classFile,
     }
 }
 
-void ares::VMCheck::visitFieldAttribute(ares::ClassFile &classFile,
+void ares::VMCheck::visitFieldAttribute(ares::ClassInfo &classFile,
                                         ares::FieldInfo &fieldInfo,
                                         ares::AttributeInfo &attributeInfo) {
     VMCheck::visitClassAttribute(classFile, attributeInfo);
 }
 
-void ares::VMCheck::visitMethodAttribute(ares::ClassFile &classFile,
+void ares::VMCheck::visitMethodAttribute(ares::ClassInfo &classFile,
                                          ares::MethodInfo &methodInfo,
                                          ares::AttributeInfo &attributeInfo) {
     VMCheck::visitClassAttribute(classFile, attributeInfo);
 }
 
-void ares::VMCheck::visitClassCPInfo(ares::ClassFile &classFile,
+void ares::VMCheck::visitClassCPInfo(ares::ClassInfo &classFile,
                                      ares::ConstantPoolInfo &constantPoolInfo) {
     switch (constantPoolInfo.m_Tag) {
         case ConstantPoolInfo::CLASS:
@@ -341,7 +341,7 @@ void ares::VMCheck::visitClassCPInfo(ares::ClassFile &classFile,
     }
 }
 
-void ares::VMCheck::visitClassInfo(ares::ClassFile &classFile,
+void ares::VMCheck::visitClassInfo(ares::ClassInfo &classFile,
                                    ares::ConstantInfo::ClassInfo &info) {
     if (!classFile.isIndexValid(info.m_NameIndex)) {
         std::cout << "The name index is not a valid constant pool index." << std::endl;
@@ -349,7 +349,7 @@ void ares::VMCheck::visitClassInfo(ares::ClassFile &classFile,
     }
 }
 
-void ares::VMCheck::visitFieldMethodInfo(ares::ClassFile &classFile,
+void ares::VMCheck::visitFieldMethodInfo(ares::ClassInfo &classFile,
                                          ares::ConstantInfo::FieldMethodInfo &info) {
     if (!classFile.isIndexValid(info.m_ClassIndex)) {
         std::cerr << "The class index is not a valid constant pool index." << std::endl;
@@ -362,7 +362,7 @@ void ares::VMCheck::visitFieldMethodInfo(ares::ClassFile &classFile,
     }
 }
 
-void ares::VMCheck::visitNameAndTypeInfo(ares::ClassFile &classFile,
+void ares::VMCheck::visitNameAndTypeInfo(ares::ClassInfo &classFile,
                                          ares::ConstantInfo::NameAndTypeInfo &info) {
     if (!classFile.isIndexValid(info.m_NameIndex)) {
         std::cerr << "The name index is not a valid constant pool index." << std::endl;
@@ -375,7 +375,7 @@ void ares::VMCheck::visitNameAndTypeInfo(ares::ClassFile &classFile,
     }
 }
 
-void ares::VMCheck::visitStringInfo(ares::ClassFile &classFile,
+void ares::VMCheck::visitStringInfo(ares::ClassInfo &classFile,
                                     ares::ConstantInfo::StringInfo &info) {
     if (!classFile.isIndexValid(info.m_StringIndex)) {
         std::cerr << "The string index is not a valid constant pool index." << std::endl;
@@ -383,7 +383,7 @@ void ares::VMCheck::visitStringInfo(ares::ClassFile &classFile,
     }
 }
 
-void ares::VMCheck::visitMethodTypeInfo(ares::ClassFile &classFile,
+void ares::VMCheck::visitMethodTypeInfo(ares::ClassInfo &classFile,
                                         ares::ConstantInfo::MethodTypeInfo &info) {
     if (!classFile.isIndexValid(info.m_DescriptorIndex)) {
         std::cerr << "The descriptor index is not a valid constant pool index" << std::endl;
@@ -391,7 +391,7 @@ void ares::VMCheck::visitMethodTypeInfo(ares::ClassFile &classFile,
     }
 }
 
-void ares::VMCheck::visitMethodHandleInfo(ares::ClassFile &classFile,
+void ares::VMCheck::visitMethodHandleInfo(ares::ClassInfo &classFile,
                                           ares::ConstantInfo::MethodHandleInfo &info) {
     if (info.m_ReferenceKind < 1 || info.m_ReferenceKind > 9) {
         std::cerr << "The reference kind is not in range of 0 to 9." << std::endl;
@@ -424,7 +424,7 @@ void ares::VMCheck::visitMethodHandleInfo(ares::ClassFile &classFile,
         }
     } else if (referenceKind == ConstantInfo::MethodHandleKind::InvokeStatic
                || referenceKind == ConstantInfo::MethodHandleKind::InvokeSpecial) {
-        if (classFile.m_ClassVersion < ClassFile::VERSION_8
+        if (classFile.m_ClassVersion < ClassInfo::VERSION_8
             && constantPoolInfo->m_Tag != ConstantPoolInfo::METHOD_REF) {
             std::cerr << "The reference index of the method handle needs to be a method ref."
                       << std::endl;
@@ -472,7 +472,7 @@ void ares::VMCheck::visitMethodHandleInfo(ares::ClassFile &classFile,
 }
 
 // TODO: Check if the bootstrap method index if correct.
-void ares::VMCheck::visitDynamicInfo(ares::ClassFile &classFile,
+void ares::VMCheck::visitDynamicInfo(ares::ClassInfo &classFile,
                                      ares::ConstantInfo::DynamicInfo &info) {
     if (!classFile.isIndexValid(info.m_NameAndTypeIndex)) {
         std::cerr << "The name and type index is not a valid constant pool index." << std::endl;
@@ -480,7 +480,7 @@ void ares::VMCheck::visitDynamicInfo(ares::ClassFile &classFile,
     }
 }
 
-void ares::VMCheck::visitModulePackageInfo(ares::ClassFile &classFile,
+void ares::VMCheck::visitModulePackageInfo(ares::ClassInfo &classFile,
                                            ares::ConstantInfo::ModulePackageInfo &info) {
     if (!classFile.isIndexValid(info.m_NameIndex)) {
         std::cerr << "The name index is not a valid constant pool index." << std::endl;

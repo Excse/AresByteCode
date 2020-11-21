@@ -15,7 +15,7 @@ namespace ares {
 
     class AttributeInfo;
 
-    class ClassFile;
+    class ClassInfo;
 
 
     class FieldInfo {
@@ -52,6 +52,6 @@ namespace ares {
     };
 
 
-    int readFields(ClassFile &classFile, unsigned int &offset);
+    int readFields(ClassInfo &classFile, unsigned int &offset);
 
 }

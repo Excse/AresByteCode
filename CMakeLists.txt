@@ -17,6 +17,6 @@ include_directories(${LIBZIP_INCLUDE_DIR})
 
 add_executable(AresObfuscator
         src/main.cpp
-        src/reader/classreader.cpp src/reader/classreader.h src/utils/utils.cpp src/utils/utils.h src/visitor/visitor.h src/visitor/vmcheck.cpp src/visitor/vmcheck.h src/structure/classfile.cpp src/structure/classfile.h src/structure/methodinfo.cpp src/structure/methodinfo.h src/structure/fieldinfo.cpp src/structure/fieldinfo.h src/structure/attributeinfo.cpp src/structure/attributeinfo.h src/structure/constantinfo.cpp src/structure/constantinfo.h src/writer/classwriter.cpp src/writer/classwriter.h)
+        src/reader/classreader.cpp src/reader/classreader.h src/utils/utils.cpp src/utils/utils.h src/visitor/visitor.h src/visitor/vmcheck.cpp src/visitor/vmcheck.h src/structure/classinfo.cpp src/structure/classinfo.h src/structure/methodinfo.cpp src/structure/methodinfo.h src/structure/fieldinfo.cpp src/structure/fieldinfo.h src/structure/attributeinfo.cpp src/structure/attributeinfo.h src/structure/constantinfo.cpp src/structure/constantinfo.h src/writer/classwriter.cpp src/writer/classwriter.h src/wrapper/classwrapper.cpp src/wrapper/classwrapper.h src/wrapper/classpool.cpp src/wrapper/classpool.h)
 
 target_link_libraries(AresObfuscator LINK_PUBLIC ${LIBZIP_LIBRARY})

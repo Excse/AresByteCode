@@ -15,7 +15,7 @@ ares::ClassWriter::ClassWriter(unsigned int size, unsigned int offset)
 
 ares::ClassWriter::~ClassWriter() = default;
 
-void ares::ClassWriter::visitClass(ares::ClassFile &classFile) {
+void ares::ClassWriter::visitClass(ares::ClassInfo &classFile) {
     ares::writeU32(classFile.m_MagicNumber, m_ByteCode, m_Offset);
     ares::writeU16(classFile.m_MinorVersion, m_ByteCode, m_Offset);
     ares::writeU16(classFile.m_MajorVersion, m_ByteCode, m_Offset);
@@ -49,7 +49,7 @@ void ares::ClassWriter::visitClass(ares::ClassFile &classFile) {
         ClassWriter::visitClassAttribute(classFile, *attributeInfo);
 }
 
-void ares::ClassWriter::visitClassCPInfo(ares::ClassFile &classFile,
+void ares::ClassWriter::visitClassCPInfo(ares::ClassInfo &classFile,
                                          ares::ConstantPoolInfo &info) {
     ares::writeU8((uint8_t &) info.m_Tag, m_ByteCode, m_Offset);
 
@@ -105,12 +105,12 @@ void ares::ClassWriter::visitClassCPInfo(ares::ClassFile &classFile,
     }
 }
 
-void ares::ClassWriter::visitClassInterface(ares::ClassFile &classFile,
+void ares::ClassWriter::visitClassInterface(ares::ClassInfo &classFile,
                                             uint16_t interface) {
 
 }
 
-void ares::ClassWriter::visitClassField(ares::ClassFile &classFile,
+void ares::ClassWriter::visitClassField(ares::ClassInfo &classFile,
                                         ares::FieldInfo &fieldInfo) {
     ares::writeU16(fieldInfo.m_AccessFlags, m_ByteCode, m_Offset);
     ares::writeU16(fieldInfo.m_NameIndex, m_ByteCode, m_Offset);
@@ -121,7 +121,7 @@ void ares::ClassWriter::visitClassField(ares::ClassFile &classFile,
         ClassWriter::visitFieldAttribute(classFile, fieldInfo, *attributeInfo);
 }
 
-void ares::ClassWriter::visitClassMethod(ares::ClassFile &classFile,
+void ares::ClassWriter::visitClassMethod(ares::ClassInfo &classFile,
                                          ares::MethodInfo &methodInfo) {
     ares::writeU16(methodInfo.m_AccessFlags, m_ByteCode, m_Offset);
     ares::writeU16(methodInfo.m_NameIndex, m_ByteCode, m_Offset);
@@ -132,7 +132,7 @@ void ares::ClassWriter::visitClassMethod(ares::ClassFile &classFile,
         ClassWriter::visitMethodAttribute(classFile, methodInfo, *attributeInfo);
 }
 
-void ares::ClassWriter::visitClassAttribute(ares::ClassFile &classFile,
+void ares::ClassWriter::visitClassAttribute(ares::ClassInfo &classFile,
                                             ares::AttributeInfo &attributeInfo) {
     ares::writeU16(attributeInfo.m_AttributeNameIndex, m_ByteCode, m_Offset);
     ares::writeU32(attributeInfo.m_AttributeLength, m_ByteCode, m_Offset);
@@ -141,13 +141,13 @@ void ares::ClassWriter::visitClassAttribute(ares::ClassFile &classFile,
         ares::writeU8(info, m_ByteCode, m_Offset);
 }
 
-void ares::ClassWriter::visitFieldAttribute(ares::ClassFile &classFile,
+void ares::ClassWriter::visitFieldAttribute(ares::ClassInfo &classFile,
                                             ares::FieldInfo &fieldInfo,
                                             ares::AttributeInfo &attributeInfo) {
     ClassWriter::visitClassAttribute(classFile, attributeInfo);
 }
 
-void ares::ClassWriter::visitMethodAttribute(ares::ClassFile &classFile,
+void ares::ClassWriter::visitMethodAttribute(ares::ClassInfo &classFile,
                                              ares::MethodInfo &methodInfo,
                                              ares::AttributeInfo &attributeInfo) {
     ClassWriter::visitClassAttribute(classFile, attributeInfo);

@@ -22,7 +22,7 @@ namespace ares {
     class FieldInfo;
 
 
-    class ClassFile {
+    class ClassInfo {
 
     public:
         enum AccessFlag : uint16_t {
@@ -79,9 +79,9 @@ namespace ares {
         std::vector <std::shared_ptr<AttributeInfo>> m_Attributes{};
 
     public:
-        ClassFile();
+        ClassInfo();
 
-        virtual ~ClassFile();
+        virtual ~ClassInfo();
 
     public:
         [[nodiscard]]
