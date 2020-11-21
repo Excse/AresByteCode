@@ -4,11 +4,14 @@
 
 #include "utils.h"
 
+#include <filesystem>
+#include <algorithm>
 #include <iostream>
 
 #include <zip.h>
 
 #include "../reader/classreader.h"
+#include "../writer/classwriter.h"
 
 int ares::readJarFile(const std::string &path, ares::AresConfiguration &configuration) {
     auto correctSuffix = path.find(".jar", path.size() - 4) != -1;
@@ -17,13 +20,14 @@ int ares::readJarFile(const std::string &path, ares::AresConfiguration &configur
         return EXIT_FAILURE;
     }
 
-    if (access(path.c_str(), F_OK) == -1) {
-        std::cerr << "The given file doesn't exist: \"" << path << "\"" << std::endl;
-        return EXIT_FAILURE;
-    }
-
     auto error = 0;
     auto zip = zip_open("/home/timo/Desktop/Banana.jar", 0, &error);
+    if (!zip) {
+        zip_error_t zipError;
+        zip_error_init_with_code(&zipError, error);
+        std::cerr << zip_error_strerror(&zipError) << std::endl;
+        return EXIT_FAILURE;
+    }
 
     auto entries = zip_get_num_entries(zip, 0);
     for (auto index = 0; index < entries; index++) {
@@ -63,6 +67,86 @@ int ares::readJarFile(const std::string &path, ares::AresConfiguration &configur
     zip_close(zip);
 
     return EXIT_SUCCESS;
+}
+
+int ares::writeJarFile(const std::string &path, const ares::AresConfiguration &configuration) {
+    auto correctSuffix = path.find(".jar", path.size() - 4) != -1;
+    if (!correctSuffix) {
+        std::cerr << "You can only enter \".jar\" files." << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    if (std::filesystem::exists(path))
+        std::filesystem::remove(path);
+
+    auto error = 0;
+    auto zip = zip_open(path.c_str(), ZIP_CREATE, &error);
+    if (!zip) {
+        zip_error_t zipError;
+        zip_error_init_with_code(&zipError, error);
+        std::cerr << zip_error_strerror(&zipError) << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::vector<uint8_t *> releaseHeap;
+    for (const auto &classFile :configuration.m_Classes) {
+        ares::ClassWriter classWriter(classFile.second->m_Size, 0);
+        classWriter.visitClass(*classFile.second);
+
+        std::vector<uint8_t> stackByteCode;
+        classWriter.getByteCode(stackByteCode);
+
+        auto heapByteCode = new uint8_t[stackByteCode.size()];
+        for (auto index = 0; index < stackByteCode.size(); index++)
+            heapByteCode[index] = stackByteCode[index];
+        releaseHeap.push_back(heapByteCode);
+
+        auto source = zip_source_buffer(zip, heapByteCode, stackByteCode.size(), 0);
+        if (source == nullptr) {
+            std::cerr << zip_strerror(zip) << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        if (zip_file_add(zip, classFile.first.c_str(), source, ZIP_FL_UNCHANGED) < 0) {
+            zip_source_free(source);
+            std::cerr << zip_strerror(zip) << std::endl;
+            return EXIT_FAILURE;
+        }
+    }
+
+    for (const auto &other : configuration.m_Others) {
+        auto source = zip_source_buffer(zip, other.second->m_ByteCode, other.second->m_Size, 0);
+        if (source == nullptr) {
+            std::cerr << zip_strerror(zip) << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        if (zip_file_add(zip, other.first.c_str(), source, ZIP_FL_UNCHANGED) < 0) {
+            zip_source_free(source);
+            std::cerr << zip_strerror(zip) << std::endl;
+            return EXIT_FAILURE;
+        }
+    }
+
+    auto source = zip_source_buffer(zip, configuration.m_Manifest->m_ByteCode,
+                                    configuration.m_Manifest->m_Size, 0);
+    if (source == nullptr) {
+        std::cerr << zip_strerror(zip) << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    if (zip_file_add(zip, "META-INF/MANIFEST.MF", source, ZIP_FL_UNCHANGED) < 0) {
+        zip_source_free(source);
+        std::cerr << zip_strerror(zip) << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    zip_close(zip);
+
+    for(const auto &release : releaseHeap)
+        delete [] release;
+
+    return EXIT_FAILURE;
 }
 
 int ares::readU32(uint32_t &data, const ClassFile &classFile, unsigned int &offset) {

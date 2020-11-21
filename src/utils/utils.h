@@ -15,6 +15,8 @@ namespace ares {
 
     int readJarFile(const std::string &path, ares::AresConfiguration &configuration);
 
+    int writeJarFile(const std::string &path, const ares::AresConfiguration &configuration);
+
     int readU32(uint32_t &data, const ares::ClassFile &classFile, unsigned int &offset);
 
     int writeU32(uint32_t &data, std::vector<uint8_t> &byteCode, unsigned int &offset);
