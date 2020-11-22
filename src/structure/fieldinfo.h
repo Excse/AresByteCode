@@ -49,9 +49,9 @@ namespace ares {
         [[nodiscard]]
         bool hasAccessFlag(AccessFlag accessFlags) const;
 
+        [[nodiscard]]
+        unsigned int getSize() const;
+
     };
-
-
-    int readFields(ClassInfo &classFile, unsigned int &offset);
 
 }

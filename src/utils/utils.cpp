@@ -10,9 +10,9 @@
 
 #include <zip.h>
 
+#include "../wrapper/classwrapper.h"
 #include "../reader/classreader.h"
 #include "../writer/classwriter.h"
-#include "../wrapper/classwrapper.h"
 
 ares::Manifest::Manifest() = default;
 
@@ -85,16 +85,16 @@ int ares::readJarFile(const std::string &path, ares::AresConfiguration &configur
             ares::readManifest(content, *manifest);
             configuration.m_Manifest = manifest;
         } else if (name.find(".class", name.size() - 6) != -1) {
-            auto jarFile = std::make_shared<ClassInfo>();
-            jarFile->m_ByteCode = arrayContents;
-            jarFile->m_Size = stat.size;
+            auto classInfo = std::make_shared<ClassInfo>();
+            classInfo->m_ByteCode = arrayContents;
+            classInfo->m_Size = stat.size;
 
-            configuration.m_Classes.emplace_back(jarFile);
+            configuration.m_Classes.emplace_back(classInfo);
 
             ClassReader classReader;
-            classReader.visitClass(*jarFile);
+            classReader.visitClass(*classInfo);
 
-            if (classReader.getOffset() != jarFile->m_Size) {
+            if (classReader.getOffset() != classInfo->m_Size) {
                 std::cerr << "The offset after reading the class doesn't match the class size"
                           << std::endl;
                 return EXIT_FAILURE;
@@ -131,26 +131,27 @@ int ares::writeJarFile(const std::string &path, ares::ClassPool &classPool,
     }
 
     std::vector<uint8_t *> releaseHeap;
-    for (const auto &classFile :configuration.m_Classes) {
-        ares::ClassWriter classWriter(classFile->m_Size, 0);
-        classWriter.visitClass(*classFile);
+    for (const auto &classInfo :configuration.m_Classes) {
+        ares::ClassWriter classWriter;
+        classWriter.visitClass(*classInfo);
 
-        std::vector<uint8_t> stackByteCode;
-        classWriter.getByteCode(stackByteCode);
+        auto stackByteCode = classWriter.getByteCode();
+        auto classSize = classInfo->getSize();
 
-        auto heapByteCode = new uint8_t[stackByteCode.size()];
-        for (auto index = 0; index < stackByteCode.size(); index++)
+        auto heapByteCode = new uint8_t[classSize];
+        for (auto index = 0; index < classSize; index++)
             heapByteCode[index] = stackByteCode[index];
         releaseHeap.push_back(heapByteCode);
 
-        auto source = zip_source_buffer(zip, heapByteCode, stackByteCode.size(), 0);
+        auto source = zip_source_buffer(zip, heapByteCode, classSize, 0);
         if (source == nullptr) {
             std::cerr << zip_strerror(zip) << std::endl;
             return EXIT_FAILURE;
         }
 
-        auto classWrapper = classPool.getWrapper(classFile);
-        if (zip_file_add(zip, classWrapper->getName().c_str(), source, ZIP_FL_UNCHANGED) < 0) {
+        auto classWrapper = classPool.getWrapper(classInfo);
+        auto className = classWrapper->getName() + ".class";
+        if (zip_file_add(zip, className.c_str(), source, ZIP_FL_UNCHANGED) < 0) {
             zip_source_free(source);
             std::cerr << zip_strerror(zip) << std::endl;
             return EXIT_FAILURE;
@@ -192,21 +193,23 @@ int ares::writeJarFile(const std::string &path, ares::ClassPool &classPool,
     return EXIT_SUCCESS;
 }
 
-int ares::readU32(uint32_t &data, const ClassInfo &classFile, unsigned int &offset) {
-    if (offset + 4 > classFile.m_Size) {
+int ares::readU32(uint32_t &data, const ClassInfo &classInfo, unsigned int &offset) {
+    if (offset + 4 > classInfo.m_Size) {
         std::cerr << "Couldn't read u32 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
     }
 
-    data = be32toh(*(uint32_t *) (classFile.m_ByteCode + offset));
+    data = be32toh(*(uint32_t *) (classInfo.m_ByteCode + offset));
     offset += 4;
 
     return EXIT_SUCCESS;
 }
 
-int ares::writeU32(uint32_t &data, std::vector<uint8_t> &byteCode, unsigned int &offset) {
-    if (offset + 4 > byteCode.size())
-        byteCode.resize(offset + 4);
+int ares::writeU32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+    if (offset + 4 > size) {
+        std::cerr << "Couldn't read u32 because it is out of bounds." << std::endl;
+        return EXIT_FAILURE;
+    }
 
     byteCode[offset + 0] = (data >> 24) & 0xFF;
     byteCode[offset + 1] = (data >> 16) & 0xFF;
@@ -217,21 +220,23 @@ int ares::writeU32(uint32_t &data, std::vector<uint8_t> &byteCode, unsigned int 
     return EXIT_SUCCESS;
 }
 
-int ares::readU16(uint16_t &data, const ares::ClassInfo &classFile, unsigned int &offset) {
-    if (offset + 2 > classFile.m_Size) {
+int ares::readU16(uint16_t &data, const ares::ClassInfo &classInfo, unsigned int &offset) {
+    if (offset + 2 > classInfo.m_Size) {
         std::cerr << "Couldn't read u16 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
     }
 
-    data = be16toh(*(uint16_t *) (classFile.m_ByteCode + offset));
+    data = be16toh(*(uint16_t *) (classInfo.m_ByteCode + offset));
     offset += 2;
 
     return EXIT_SUCCESS;
 }
 
-int ares::writeU16(uint16_t &data, std::vector<uint8_t> &byteCode, unsigned int &offset) {
-    if (offset + 2 > byteCode.size())
-        byteCode.resize(offset + 2);
+int ares::writeU16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+    if (offset + 2 > size) {
+        std::cerr << "Couldn't write u16 because it is out of bounds." << std::endl;
+        return EXIT_FAILURE;
+    }
 
     byteCode[offset + 0] = (data >> 8) & 0xFF;
     byteCode[offset + 1] = data & 0xFF;
@@ -240,21 +245,23 @@ int ares::writeU16(uint16_t &data, std::vector<uint8_t> &byteCode, unsigned int 
     return EXIT_SUCCESS;
 }
 
-int ares::readU8(uint8_t &data, const ares::ClassInfo &classFile, unsigned int &offset) {
-    if (offset + 1 > classFile.m_Size) {
+int ares::readU8(uint8_t &data, const ares::ClassInfo &classInfo, unsigned int &offset) {
+    if (offset + 1 > classInfo.m_Size) {
         std::cerr << "Couldn't read u8 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
     }
 
-    data = *(uint8_t *) (classFile.m_ByteCode + offset);
+    data = *(uint8_t *) (classInfo.m_ByteCode + offset);
     offset += 1;
 
     return EXIT_SUCCESS;
 }
 
-int ares::writeU8(uint8_t &data, std::vector<uint8_t> &byteCode, unsigned int &offset) {
-    if (offset + 1 > byteCode.size())
-        byteCode.resize(offset + 1);
+int ares::writeU8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+    if (offset + 1 > size) {
+        std::cerr << "Couldn't write u8 because it is out of bounds." << std::endl;
+        return EXIT_FAILURE;
+    }
 
     byteCode[offset] = data & 0xFF;
     offset += 1;
@@ -262,26 +269,28 @@ int ares::writeU8(uint8_t &data, std::vector<uint8_t> &byteCode, unsigned int &o
     return EXIT_SUCCESS;
 }
 
-int ares::readU8Array(uint8_t *data, unsigned int size, const ares::ClassInfo &classFile,
+int ares::readU8Array(uint8_t *data, unsigned int size, const ares::ClassInfo &classInfo,
                       unsigned int &offset) {
-    if (offset + (size * 1) > classFile.m_Size) {
+    if (offset + (size * 1) > classInfo.m_Size) {
         std::cerr << "Couldn't read the u8 array because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
     }
 
     for (auto index = 0; index < size; index++)
-        readU8(data[index], classFile, offset);
+        readU8(data[index], classInfo, offset);
 
     return EXIT_SUCCESS;
 }
 
-int ares::writeU8Array(uint8_t *data, unsigned int dataSize, std::vector<uint8_t> &byteCode,
+int ares::writeU8Array(uint8_t *data, unsigned int dataSize, uint8_t *byteCode, unsigned int size,
                        unsigned int &offset) {
-    if (offset + (dataSize * 1) > byteCode.size())
-        byteCode.resize(offset + (dataSize * 1));
+    if (offset + (dataSize * 1) > size) {
+        std::cerr << "Couldn't write the u8 array because it is out of bounds." << std::endl;
+        return EXIT_FAILURE;
+    }
 
     for (auto index = 0; index < dataSize; index++)
-        writeU8(data[index], byteCode, offset);
+        writeU8(data[index], byteCode, size, offset);
 
     return EXIT_SUCCESS;
 }

@@ -29,6 +29,7 @@ namespace ares {
 
         bool hasSuperClass();
 
+        [[deprecated]]
         void setName(const std::string &name);
 
         std::string getName();

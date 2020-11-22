@@ -11,42 +11,44 @@ namespace ares {
     class ClassWriter : Visitor {
 
     private:
-        std::vector<uint8_t> m_ByteCode{};
-        unsigned int m_Offset;
+        unsigned int m_Offset{}, m_Size{};
+        uint8_t *m_ByteCode{};
 
     public:
-        explicit ClassWriter(unsigned int size = 0, unsigned int offset = 0);
+        explicit ClassWriter(unsigned int offset = 0);
 
         virtual ~ClassWriter();
 
     public:
-        void visitClass(ClassInfo &classFile) override;
-
-        void getByteCode(std::vector<uint8_t> &byteCode);
+        void visitClass(ClassInfo &classInfo) override;
 
     private:
-        void visitClassCPInfo(ares::ClassInfo &classFile,
+        void visitClassCPInfo(ares::ClassInfo &classInfo,
                               ares::ConstantPoolInfo &info) override;
 
-        void visitClassInterface(ares::ClassInfo &classFile,
+        void visitClassInterface(ares::ClassInfo &classInfo,
                                  uint16_t interface) override;
 
-        void visitClassField(ares::ClassInfo &classFile,
+        void visitClassField(ares::ClassInfo &classInfo,
                              ares::FieldInfo &fieldInfo) override;
 
-        void visitClassMethod(ares::ClassInfo &classFile,
+        void visitClassMethod(ares::ClassInfo &classInfo,
                               ares::MethodInfo &methodInfo) override;
 
-        void visitClassAttribute(ares::ClassInfo &classFile,
+        void visitClassAttribute(ares::ClassInfo &classInfo,
                                  ares::AttributeInfo &attributeInfo) override;
 
-        void visitFieldAttribute(ares::ClassInfo &classFile,
+        void visitFieldAttribute(ares::ClassInfo &classInfo,
                                  ares::FieldInfo &fieldInfo,
                                  ares::AttributeInfo &attributeInfo) override;
 
-        void visitMethodAttribute(ares::ClassInfo &classFile,
+        void visitMethodAttribute(ares::ClassInfo &classInfo,
                                   ares::MethodInfo &methodInfo,
                                   ares::AttributeInfo &attributeInfo) override;
+
+    public:
+        [[nodiscard]]
+        uint8_t *getByteCode() const;
 
     };
 

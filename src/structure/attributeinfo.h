@@ -47,6 +47,10 @@ namespace ares {
 
         virtual ~AttributeInfo();
 
+    public:
+        [[nodiscard]]
+        unsigned int getSize() const;
+
     };
 
 }

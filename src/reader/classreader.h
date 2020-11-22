@@ -29,86 +29,86 @@ namespace ares {
         virtual ~ClassReader();
 
     public:
-        void visitClass(ares::ClassInfo &classFile) override;
+        void visitClass(ares::ClassInfo &classInfo) override;
 
     private:
-        void readClassAttributes(ClassInfo &classFile);
+        void readClassAttributes(ClassInfo &classInfo);
 
-        void visitClassAttribute(ares::ClassInfo &classFile,
+        void visitClassAttribute(ares::ClassInfo &classInfo,
                                  ares::AttributeInfo &attributeInfo) override;
 
-        void readMagicNumber(ares::ClassInfo &classFile);
+        void readMagicNumber(ares::ClassInfo &classInfo);
 
-        void readClassVersion(ares::ClassInfo &classFile);
+        void readClassVersion(ares::ClassInfo &classInfo);
 
-        void readConstantPool(ares::ClassInfo &classFile);
+        void readConstantPool(ares::ClassInfo &classInfo);
 
-        void visitClassCPInfo(ares::ClassInfo &classFile,
+        void visitClassCPInfo(ares::ClassInfo &classInfo,
                               ares::ConstantPoolInfo &info) override;
 
-        void readClassInfo(ares::ClassInfo &classFile,
+        void readClassInfo(ares::ClassInfo &classInfo,
                            ConstantInfo::ClassInfo &info);
 
-        void readUTF8Info(ares::ClassInfo &classFile,
+        void readUTF8Info(ares::ClassInfo &classInfo,
                           ConstantInfo::UTF8Info &info);
 
-        void readFieldMethodInfo(ares::ClassInfo &classFile,
+        void readFieldMethodInfo(ares::ClassInfo &classInfo,
                                  ConstantInfo::FieldMethodInfo &info);
 
-        void readNameAndType(ares::ClassInfo &classFile,
+        void readNameAndType(ares::ClassInfo &classInfo,
                              ConstantInfo::NameAndTypeInfo &info);
 
-        void readStringInfo(ares::ClassInfo &classFile,
+        void readStringInfo(ares::ClassInfo &classInfo,
                             ConstantInfo::StringInfo &info);
 
-        void readDoubleLong(ares::ClassInfo &classFile,
+        void readDoubleLong(ares::ClassInfo &classInfo,
                             ConstantInfo::DoubleLongInfo &info);
 
-        void readFloatInteger(ares::ClassInfo &classFile,
+        void readFloatInteger(ares::ClassInfo &classInfo,
                               ConstantInfo::FloatIntegerInfo &info);
 
-        void readMethodType(ares::ClassInfo &classFile,
+        void readMethodType(ares::ClassInfo &classInfo,
                             ConstantInfo::MethodTypeInfo &info);
 
-        void readMethodHandle(ares::ClassInfo &classFile,
+        void readMethodHandle(ares::ClassInfo &classInfo,
                               ConstantInfo::MethodHandleInfo &info);
 
-        void readDynamic(ares::ClassInfo &classFile,
+        void readDynamic(ares::ClassInfo &classInfo,
                          ConstantInfo::DynamicInfo &info);
 
-        void readModulePackage(ares::ClassInfo &classFile,
+        void readModulePackage(ares::ClassInfo &classInfo,
                                ConstantInfo::ModulePackageInfo &info);
 
-        void readAccessFlags(ClassInfo &classFile);
+        void readAccessFlags(ClassInfo &classInfo);
 
-        void readThisClass(ClassInfo &classFile);
+        void readThisClass(ClassInfo &classInfo);
 
-        void readSuperClass(ClassInfo &classFile);
+        void readSuperClass(ClassInfo &classInfo);
 
-        void readInterfaces(ClassInfo &classFile);
+        void readInterfaces(ClassInfo &classInfo);
 
-        void visitClassInterface(ClassInfo &classFile,
+        void visitClassInterface(ClassInfo &classInfo,
                                  uint16_t interface) override;
 
-        void readFields(ClassInfo &classFile);
+        void readFields(ClassInfo &classInfo);
 
-        void visitClassField(ares::ClassInfo &classFile,
+        void visitClassField(ares::ClassInfo &classInfo,
                              ares::FieldInfo &fieldInfo) override;
 
-        void readFieldAttributes(ClassInfo &classFile, FieldInfo &fieldInfo);
+        void readFieldAttributes(ClassInfo &classInfo, FieldInfo &fieldInfo);
 
-        void visitFieldAttribute(ares::ClassInfo &classFile,
+        void visitFieldAttribute(ares::ClassInfo &classInfo,
                                  ares::FieldInfo &fieldInfo,
                                  ares::AttributeInfo &attributeInfo) override;
 
-        void readMethods(ClassInfo &classFile);
+        void readMethods(ClassInfo &classInfo);
 
-        void visitClassMethod(ares::ClassInfo &classFile,
+        void visitClassMethod(ares::ClassInfo &classInfo,
                               ares::MethodInfo &methodInfo) override;
 
-        void readMethodAttributes(ClassInfo &classFile, MethodInfo &methodInfo);
+        void readMethodAttributes(ClassInfo &classInfo, MethodInfo &methodInfo);
 
-        void visitMethodAttribute(ares::ClassInfo &classFile,
+        void visitMethodAttribute(ares::ClassInfo &classInfo,
                                   ares::MethodInfo &methodInfo,
                                   ares::AttributeInfo &attributeInfo) override;
 

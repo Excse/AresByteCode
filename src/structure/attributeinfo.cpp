@@ -7,3 +7,7 @@
 ares::AttributeInfo::AttributeInfo() = default;
 
 ares::AttributeInfo::~AttributeInfo() = default;
+
+unsigned int ares::AttributeInfo::getSize() const {
+    return 6 + m_Info.size();
+}

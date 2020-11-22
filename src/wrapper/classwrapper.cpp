@@ -66,6 +66,12 @@ void ares::ClassWrapper::setName(const std::string &name) {
     if (utf8Info->m_Tag != ares::ConstantPoolInfo::UTF_8)
         abort();
 
+//    auto oldName = std::string((char *) utf8Info->m_Info.utf8Info.m_Bytes,
+//                               utf8Info->m_Info.utf8Info.m_Length);
+//    auto oldPointer = m_ClassPool->m_Classes[oldName];
+//    m_ClassPool->m_Classes.erase(oldName);
+//    m_ClassPool->m_Classes[oldName] = oldPointer;
+
     delete[] utf8Info->m_Info.utf8Info.m_Bytes;
 
     auto newName = new uint8_t[name.size()];

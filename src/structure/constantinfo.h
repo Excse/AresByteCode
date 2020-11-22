@@ -100,6 +100,10 @@ namespace ares {
 
         virtual ~ConstantPoolInfo();
 
+    public:
+        [[nodiscard]]
+        unsigned int getSize() const;
+
     };
 
 }

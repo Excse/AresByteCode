@@ -16,7 +16,7 @@ namespace ares {
 
     class ClassPool {
 
-    private:
+    public:
         std::unordered_map<std::string, std::shared_ptr<ares::ClassWrapper>> m_Classes{};
 
     public:
