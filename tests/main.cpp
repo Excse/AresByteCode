@@ -3,9 +3,7 @@
 #include <iterator>
 #include <chrono>
 
-#include "wrapper/classwrapper.h"
 #include "reader/classreader.h"
-#include "wrapper/classpool.h"
 #include "visitor/vmcheck.h"
 #include "utils/utils.h"
 
@@ -20,27 +18,6 @@ int main() {
     for (const auto &classInfo : configuration.m_Classes) {
         ares::VMCheck vmCheck;
         vmCheck.visitClass(*classInfo);
-
-//        auto classWrapper = classPool.getWrapper(classInfo);
-//        std::cout << classWrapper->getName() << std::endl;
-//
-//        std::cout << " - Superclass: " << std::endl;
-//        if(classWrapper->hasSuperClass()) {
-//            if(auto superClass = classWrapper->getSuperClass()) {
-//                std::cout << "  - " << (*superClass)->getName() << std::endl;
-//            } else {
-//                std::cout << "  - Not in the class pool." << std::endl;
-//            }
-//        }
-//
-//        std::cout << " - Interfaces: " << std::endl;
-//        for(auto &interface : classWrapper->getInterfaces()) {
-//            if(interface) {
-//                std::cout << "  - " << (*interface)->getName() << std::endl;
-//            } else {
-//                std::cout << "  - Not in the class pool." << std::endl;
-//            }
-//        }
     }
 
     if (ares::writeJarFile("/home/timo/Desktop/Banana_OBF.jar",
