@@ -16,8 +16,9 @@ ares::ClassWrapper::ClassWrapper(ares::ClassPool *classPool,
 
 ares::ClassWrapper::~ClassWrapper() = default;
 
-std::vector<std::shared_ptr<ares::ClassWrapper>> ares::ClassWrapper::getInterfaces() {
-    std::vector<std::shared_ptr<ares::ClassWrapper>> interfaces;
+std::vector<std::optional<std::shared_ptr<ares::ClassWrapper>>>
+ares::ClassWrapper::getInterfaces() {
+    std::vector<std::optional<std::shared_ptr<ares::ClassWrapper>>> interfaces;
 
     for (auto const &interface : m_ClassFile->m_Interfaces) {
         auto classInfo = m_ClassFile->m_ConstantPool[interface - 1];
@@ -30,15 +31,22 @@ std::vector<std::shared_ptr<ares::ClassWrapper>> ares::ClassWrapper::getInterfac
 
         std::string name((char *) utf8Info->m_Info.utf8Info.m_Bytes,
                          utf8Info->m_Info.utf8Info.m_Length);
-        interfaces.push_back(m_ClassPool->getWrapper(name));
+
+        auto classWrapper = m_ClassPool->getWrapper(name);
+        if (!classWrapper) {
+            interfaces.emplace_back(std::nullopt);
+            continue;
+        }
+
+        interfaces.emplace_back(classWrapper);
     }
 
     return interfaces;
 }
 
-std::shared_ptr<ares::ClassWrapper> ares::ClassWrapper::getSuperClass() {
+std::optional<std::shared_ptr<ares::ClassWrapper>> ares::ClassWrapper::getSuperClass() {
     if (m_ClassFile->m_SuperClass == 0)
-        return nullptr;
+        return std::nullopt;
 
     auto classInfo = m_ClassFile->m_ConstantPool[m_ClassFile->m_SuperClass - 1];
     if (classInfo->m_Tag != ares::ConstantPoolInfo::CLASS)
@@ -50,7 +58,11 @@ std::shared_ptr<ares::ClassWrapper> ares::ClassWrapper::getSuperClass() {
 
     std::string name((char *) utf8Info->m_Info.utf8Info.m_Bytes,
                      utf8Info->m_Info.utf8Info.m_Length);
-    return m_ClassPool->getWrapper(name);
+
+    auto classWrapper = m_ClassPool->getWrapper(name);
+    if (!classWrapper)
+        return std::nullopt;
+    return classWrapper;
 }
 
 bool ares::ClassWrapper::hasSuperClass() {

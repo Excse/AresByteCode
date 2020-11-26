@@ -27,7 +27,8 @@ void ares::ClassReader::visitClass(ares::ClassInfo &classInfo) {
 }
 
 void ares::ClassReader::readClassAttributes(ares::ClassInfo &classInfo) {
-    if (ares::readU16(classInfo.m_AttributesCount, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classInfo.m_AttributesCount, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the attribute count." << std::endl;
         abort();
     }
@@ -44,19 +45,22 @@ void ares::ClassReader::readClassAttributes(ares::ClassInfo &classInfo) {
 
 void ares::ClassReader::visitClassAttribute(ares::ClassInfo &classInfo,
                                             ares::AttributeInfo &attributeInfo) {
-    if (ares::readU16(attributeInfo.m_AttributeNameIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(attributeInfo.m_AttributeNameIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the name index of the attribute." << std::endl;
         abort();
     }
 
-    if (ares::readU32(attributeInfo.m_AttributeLength, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU32(attributeInfo.m_AttributeLength, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the length of the attribute." << std::endl;
         abort();
     }
 
     attributeInfo.m_Info = std::vector<uint8_t>(attributeInfo.m_AttributeLength);
     for (auto &info : attributeInfo.m_Info) {
-        if (ares::readU8(info, classInfo, m_Offset) == EXIT_FAILURE) {
+        if (ares::readU8(info, classInfo.m_ByteCode,
+                         classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
             std::cerr << "Couldn't read the info of the attribute." << std::endl;
             abort();
         }
@@ -64,34 +68,36 @@ void ares::ClassReader::visitClassAttribute(ares::ClassInfo &classInfo,
 }
 
 void ares::ClassReader::readMagicNumber(ClassInfo &classInfo) {
-    if (ares::readU32(classInfo.m_MagicNumber, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU32(classInfo.m_MagicNumber, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the magic number of the class file." << std::endl;
         abort();
     }
 }
 
 void ares::ClassReader::readClassVersion(ClassInfo &classInfo) {
-    if (ares::readU16(classInfo.m_MinorVersion, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classInfo.m_MinorVersion, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the minor version of the class file." << std::endl;
         abort();
     }
 
-    if (ares::readU16(classInfo.m_MajorVersion, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classInfo.m_MajorVersion, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the major version of the class file." << std::endl;
         abort();
     }
 
-    classInfo.m_ClassVersion = ClassInfo::ClassVersion(classInfo.m_MajorVersion);
+    classInfo.m_ClassVersion = ClassInfo::UNDEFINED;
     if (classInfo.m_MajorVersion >= ClassInfo::VERSION_1_1
         && classInfo.m_MajorVersion <= ClassInfo::VERSION_15) {
         classInfo.m_ClassVersion = ClassInfo::ClassVersion(classInfo.m_MajorVersion);
-    } else {
-        classInfo.m_ClassVersion = ClassInfo::UNDEFINED;
     }
 }
 
 void ares::ClassReader::readConstantPool(ClassInfo &classInfo) {
-    if (ares::readU16(classInfo.m_ConstantPoolCount, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classInfo.m_ConstantPoolCount, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cout << "Couldn't read the constant pool count of this class file" << std::endl;
         abort();
     }
@@ -112,7 +118,8 @@ void ares::ClassReader::readConstantPool(ClassInfo &classInfo) {
 void ares::ClassReader::visitClassCPInfo(ares::ClassInfo &classInfo,
                                          ares::ConstantPoolInfo &info) {
     uint8_t infoTag = 0;
-    if (ares::readU8(infoTag, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU8(infoTag, classInfo.m_ByteCode,
+                     classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the tag of the constant pool info of this class file"
                   << std::endl;
         abort();
@@ -171,7 +178,8 @@ void ares::ClassReader::visitClassCPInfo(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readClassInfo(ares::ClassInfo &classInfo,
                                       ConstantInfo::ClassInfo &info) {
-    if (ares::readU16(info.m_NameIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_NameIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the name index of the class pool info." << std::endl;
         abort();
     }
@@ -179,13 +187,15 @@ void ares::ClassReader::readClassInfo(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readUTF8Info(ares::ClassInfo &classInfo,
                                      ConstantInfo::UTF8Info &info) {
-    if (ares::readU16(info.m_Length, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_Length, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the length of the class pool info." << std::endl;
         abort();
     }
 
     info.m_Bytes = new uint8_t[info.m_Length];
-    if (ares::readU8Array(info.m_Bytes, info.m_Length, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU8Array(info.m_Bytes, info.m_Length, classInfo.m_ByteCode,
+                          classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the bytes of the class pool info." << std::endl;
         abort();
     }
@@ -193,12 +203,14 @@ void ares::ClassReader::readUTF8Info(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readFieldMethodInfo(ares::ClassInfo &classInfo,
                                             ConstantInfo::FieldMethodInfo &info) {
-    if (ares::readU16(info.m_ClassIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_ClassIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the class index of the class pool info." << std::endl;
         abort();
     }
 
-    if (ares::readU16(info.m_NameAndTypeIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_NameAndTypeIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the name and type index of the class pool info." << std::endl;
         abort();
     }
@@ -206,12 +218,14 @@ void ares::ClassReader::readFieldMethodInfo(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readNameAndType(ares::ClassInfo &classInfo,
                                         ConstantInfo::NameAndTypeInfo &info) {
-    if (ares::readU16(info.m_NameIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_NameIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the name index of the class pool info." << std::endl;
         abort();
     }
 
-    if (ares::readU16(info.m_DescriptorIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_DescriptorIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the descriptor index of the class pool info." << std::endl;
         abort();
     }
@@ -219,7 +233,8 @@ void ares::ClassReader::readNameAndType(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readStringInfo(ares::ClassInfo &classInfo,
                                        ConstantInfo::StringInfo &info) {
-    if (ares::readU16(info.m_StringIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_StringIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the string index of the class pool info." << std::endl;
         abort();
     }
@@ -227,12 +242,14 @@ void ares::ClassReader::readStringInfo(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readDoubleLong(ares::ClassInfo &classInfo,
                                        ConstantInfo::DoubleLongInfo &info) {
-    if (ares::readU32(info.m_HighBytes, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU32(info.m_HighBytes, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the high bytes of the class pool info." << std::endl;
         abort();
     }
 
-    if (ares::readU32(info.m_LowBytes, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU32(info.m_LowBytes, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the low bytes of the class pool info." << std::endl;
         abort();
     }
@@ -240,7 +257,8 @@ void ares::ClassReader::readDoubleLong(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readFloatInteger(ares::ClassInfo &classInfo,
                                          ConstantInfo::FloatIntegerInfo &info) {
-    if (ares::readU32(info.m_Bytes, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU32(info.m_Bytes, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the bytes of the class pool info." << std::endl;
         abort();
     }
@@ -248,7 +266,8 @@ void ares::ClassReader::readFloatInteger(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readMethodType(ares::ClassInfo &classInfo,
                                        ConstantInfo::MethodTypeInfo &info) {
-    if (ares::readU16(info.m_DescriptorIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_DescriptorIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the descriptor index of the class pool info." << std::endl;
         abort();
     }
@@ -256,12 +275,14 @@ void ares::ClassReader::readMethodType(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readMethodHandle(ares::ClassInfo &classInfo,
                                          ConstantInfo::MethodHandleInfo &info) {
-    if (ares::readU8(info.m_ReferenceKind, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU8(info.m_ReferenceKind, classInfo.m_ByteCode,
+                     classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the reference kind of the class pool info." << std::endl;
         abort();
     }
 
-    if (ares::readU16(info.m_ReferenceIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_ReferenceIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the reference index of the class pool info." << std::endl;
         abort();
     }
@@ -269,13 +290,15 @@ void ares::ClassReader::readMethodHandle(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readDynamic(ares::ClassInfo &classInfo,
                                     ConstantInfo::DynamicInfo &info) {
-    if (ares::readU16(info.m_BoostrapMethodAttrIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_BoostrapMethodAttrIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the bootstrap method attribute index of the class pool info."
                   << std::endl;
         abort();
     }
 
-    if (ares::readU16(info.m_NameAndTypeIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_NameAndTypeIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the name and type index for the class pool info." << std::endl;
         abort();
     }
@@ -283,42 +306,48 @@ void ares::ClassReader::readDynamic(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readModulePackage(ares::ClassInfo &classInfo,
                                           ConstantInfo::ModulePackageInfo &info) {
-    if (ares::readU16(info.m_NameIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(info.m_NameIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the name index of the class pool info." << std::endl;
         abort();
     }
 }
 
 void ares::ClassReader::readAccessFlags(ClassInfo &classInfo) {
-    if (ares::readU16(classInfo.m_AccessFlags, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classInfo.m_AccessFlags, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the access flags of the class file." << std::endl;
         abort();
     }
 }
 
 void ares::ClassReader::readThisClass(ClassInfo &classInfo) {
-    if (ares::readU16(classInfo.m_ThisClass, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classInfo.m_ThisClass, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the \"this class\" of this class file." << std::endl;
         abort();
     }
 }
 
 void ares::ClassReader::readSuperClass(ClassInfo &classInfo) {
-    if (ares::readU16(classInfo.m_SuperClass, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classInfo.m_SuperClass, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the \"super class\" of the class file." << std::endl;
         abort();
     }
 }
 
 void ares::ClassReader::readInterfaces(ClassInfo &classInfo) {
-    if (ares::readU16(classInfo.m_InterfacesCount, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classInfo.m_InterfacesCount, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the interface count of the class file." << std::endl;
         abort();
     }
 
     classInfo.m_Interfaces = std::vector<uint16_t>(classInfo.m_InterfacesCount);
     for (auto &interface : classInfo.m_Interfaces) {
-        if (ares::readU16(interface, classInfo, m_Offset) == EXIT_FAILURE) {
+        if (ares::readU16(interface, classInfo.m_ByteCode,
+                          classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
             std::cerr << "Couldn't read the interface of this class." << std::endl;
             abort();
         }
@@ -329,7 +358,8 @@ void ares::ClassReader::visitClassInterface(ares::ClassInfo &classInfo,
                                             uint16_t interface) {}
 
 void ares::ClassReader::readFields(ClassInfo &classInfo) {
-    if (ares::readU16(classInfo.m_FieldsCount, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classInfo.m_FieldsCount, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the field count of the class file." << std::endl;
         abort();
     }
@@ -345,17 +375,20 @@ void ares::ClassReader::readFields(ClassInfo &classInfo) {
 
 void ares::ClassReader::visitClassField(ares::ClassInfo &classInfo,
                                         ares::FieldInfo &fieldInfo) {
-    if (ares::readU16(fieldInfo.m_AccessFlags, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(fieldInfo.m_AccessFlags, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the access flags of the field." << std::endl;
         abort();
     }
 
-    if (ares::readU16(fieldInfo.m_NameIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(fieldInfo.m_NameIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the name index of the field." << std::endl;
         abort();
     }
 
-    if (ares::readU16(fieldInfo.m_DescriptorIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(fieldInfo.m_DescriptorIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the descriptor index of the field." << std::endl;
         abort();
     }
@@ -365,7 +398,8 @@ void ares::ClassReader::visitClassField(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readFieldAttributes(ares::ClassInfo &classInfo,
                                             ares::FieldInfo &fieldInfo) {
-    if (ares::readU16(fieldInfo.m_AttributesCount, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(fieldInfo.m_AttributesCount, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the attribute count." << std::endl;
         abort();
     }
@@ -387,7 +421,8 @@ void ares::ClassReader::visitFieldAttribute(ares::ClassInfo &classInfo,
 }
 
 void ares::ClassReader::readMethods(ares::ClassInfo &classInfo) {
-    if (ares::readU16(classInfo.m_MethodCount, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(classInfo.m_MethodCount, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the method count of the class file." << std::endl;
         abort();
     }
@@ -403,17 +438,20 @@ void ares::ClassReader::readMethods(ares::ClassInfo &classInfo) {
 
 void ares::ClassReader::visitClassMethod(ares::ClassInfo &classInfo,
                                          ares::MethodInfo &methodInfo) {
-    if (ares::readU16(methodInfo.m_AccessFlags, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(methodInfo.m_AccessFlags, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the access flags of the method." << std::endl;
         abort();
     }
 
-    if (ares::readU16(methodInfo.m_NameIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(methodInfo.m_NameIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the name index of the method." << std::endl;
         abort();
     }
 
-    if (ares::readU16(methodInfo.m_DescriptorIndex, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(methodInfo.m_DescriptorIndex, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the descriptor index of the method." << std::endl;
         abort();
     }
@@ -423,7 +461,8 @@ void ares::ClassReader::visitClassMethod(ares::ClassInfo &classInfo,
 
 void ares::ClassReader::readMethodAttributes(ares::ClassInfo &classInfo,
                                              ares::MethodInfo &methodInfo) {
-    if (ares::readU16(methodInfo.m_AttributesCount, classInfo, m_Offset) == EXIT_FAILURE) {
+    if (ares::readU16(methodInfo.m_AttributesCount, classInfo.m_ByteCode,
+                      classInfo.m_Size, m_Offset) == EXIT_FAILURE) {
         std::cerr << "Couldn't read the attribute count." << std::endl;
         abort();
     }

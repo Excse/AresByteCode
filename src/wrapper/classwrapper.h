@@ -23,9 +23,9 @@ namespace ares {
         virtual ~ClassWrapper();
 
     public:
-        std::vector<std::shared_ptr<ares::ClassWrapper>> getInterfaces();
+        std::vector<std::optional<std::shared_ptr<ares::ClassWrapper>>> getInterfaces();
 
-        std::shared_ptr<ares::ClassWrapper> getSuperClass();
+        std::optional<std::shared_ptr<ares::ClassWrapper>> getSuperClass();
 
         bool hasSuperClass();
 
