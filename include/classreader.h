@@ -11,10 +11,10 @@
 #include <vector>
 #include <list>
 
-#include "../structure/attributeinfo.h"
-#include "../structure/constantinfo.h"
-#include "../structure/classinfo.h"
-#include "../visitor/visitor.h"
+#include "attributeinfo.h"
+#include "constantinfo.h"
+#include "classinfo.h"
+#include "visitor.h"
 
 namespace ares {
 

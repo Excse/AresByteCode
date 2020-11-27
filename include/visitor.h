@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "../structure/attributeinfo.h"
-#include "../structure/methodinfo.h"
-#include "../structure/fieldinfo.h"
-#include "../structure/classinfo.h"
+#include "attributeinfo.h"
+#include "methodinfo.h"
+#include "fieldinfo.h"
+#include "classinfo.h"
 
 namespace ares {
 

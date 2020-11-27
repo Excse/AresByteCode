@@ -2,11 +2,11 @@
 // Created by timo on 07.11.20.
 //
 
-#include "classreader.h"
+#include "../../include/classreader.h"
 
 #include <iostream>
 
-#include "../utils/utils.h"
+#include "../../include/utils.h"
 
 ares::ClassReader::ClassReader(unsigned int offset)
         : m_Offset(offset) {}

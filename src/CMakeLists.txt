@@ -4,37 +4,32 @@ find_package(LibZip)
 include_directories(${LIBZIP_INCLUDE_DIR})
 
 add_library(aresbc SHARED
+        ../include/visitor.h
         reader/classreader.cpp
-        reader/classreader.h
+        ../include/classreader.h
         utils/utils.cpp
-        utils/utils.h
-        visitor/visitor.h
+        ../include/utils.h
         visitor/vmcheck.cpp
-        visitor/vmcheck.h
+        ../include/vmcheck.h
         structure/classinfo.cpp
-        structure/classinfo.h
+        ../include/classinfo.h
         structure/methodinfo.cpp
-        structure/methodinfo.h
+        ../include/methodinfo.h
         structure/fieldinfo.cpp
-        structure/fieldinfo.h
+        ../include/fieldinfo.h
         structure/attributeinfo.cpp
-        structure/attributeinfo.h
+        ../include/attributeinfo.h
         structure/constantinfo.cpp
-        structure/constantinfo.h
+        ../include/constantinfo.h
         writer/classwriter.cpp
-        writer/classwriter.h
-        wrapper/classwrapper.cpp
-        wrapper/classwrapper.h
-        wrapper/classpool.cpp
-        wrapper/classpool.h)
+        ../include/classwriter.h)
 
 set_target_properties(aresbc PROPERTIES
-        VERSION ${PROJECT_VERSION}
-        PUBLIC_HEADER
-        "writer/classwriter.h;reader/classreader.h;visitor/visitor.h;visitor/vmcheck.h;utils/utils.h;structure/attributeinfo.h;structure/classinfo.h;structure/constantinfo.h;structure/fieldinfo.h;structure/methodinfo.h;")
+        VERSION ${PROJECT_VERSION})
 target_link_libraries(aresbc LINK_PUBLIC ${LIBZIP_LIBRARY})
 
 include(GNUInstallDirs)
 install(TARGETS aresbc
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/aresbc")
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/aresbc")

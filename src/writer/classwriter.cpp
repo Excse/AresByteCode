@@ -3,11 +3,11 @@
 //
 
 #include <iostream>
-#include "classwriter.h"
+#include "../../include/classwriter.h"
 
-#include "../utils/utils.h"
+#include "../../include/utils.h"
 
-#include "../structure/constantinfo.h"
+#include "../../include/constantinfo.h"
 
 ares::ClassWriter::ClassWriter(unsigned int offset)
         : m_Offset(offset) {}

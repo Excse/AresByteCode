@@ -4,9 +4,12 @@
 
 #pragma once
 
+#include "attributeinfo.h"
+#include "constantinfo.h"
+#include "methodinfo.h"
+#include "classinfo.h"
+#include "fieldinfo.h"
 #include "visitor.h"
-
-#include "../structure/constantinfo.h"
 
 namespace ares {
 

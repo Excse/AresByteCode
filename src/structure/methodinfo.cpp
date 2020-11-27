@@ -2,9 +2,9 @@
 // Created by timo on 16.11.20.
 //
 
-#include "methodinfo.h"
+#include "../../include/methodinfo.h"
 
-#include "attributeinfo.h"
+#include "../../include/attributeinfo.h"
 
 ares::MethodInfo::MethodInfo() = default;
 

@@ -9,8 +9,7 @@
 #include <vector>
 #include <memory>
 
-#include "../structure/classinfo.h"
-#include "../wrapper/classpool.h"
+#include "classinfo.h"
 
 namespace ares {
 
@@ -33,7 +32,7 @@ namespace ares {
 
     public:
         std::unordered_map<std::string, std::pair<uint8_t *, unsigned int>> m_Others{};
-        std::vector<std::shared_ptr<ares::ClassInfo>> m_Classes{};
+        std::unordered_map<std::string, std::shared_ptr<ares::ClassInfo>> m_Classes{};
         std::shared_ptr<ares::Manifest> m_Manifest{};
 
     public:
@@ -47,18 +46,17 @@ namespace ares {
 
     int readJarFile(const std::string &path, ares::AresConfiguration &configuration);
 
-    int writeJarFile(const std::string &path, ares::ClassPool &classPool,
-                     const ares::AresConfiguration &configuration);
+    int writeJarFile(const std::string &path, const ares::AresConfiguration &configuration);
 
-    int readU32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
+    int readU32(uint32_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
     int writeU32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
-    int readU16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
+    int readU16(uint16_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
     int writeU16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
-    int readU8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
+    int readU8(uint8_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
     int writeU8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
 

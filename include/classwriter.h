@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../visitor/visitor.h"
+#include "visitor.h"
 
 namespace ares {
 

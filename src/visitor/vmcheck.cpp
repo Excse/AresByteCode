@@ -4,7 +4,7 @@
 
 // TODO: Make the error messages better
 
-#include "vmcheck.h"
+#include "../../include/vmcheck.h"
 
 #include <iostream>
 

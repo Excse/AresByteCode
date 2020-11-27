@@ -2,7 +2,7 @@
 // Created by timo on 16.11.20.
 //
 
-#include "attributeinfo.h"
+#include "../../include/attributeinfo.h"
 
 ares::AttributeInfo::AttributeInfo() = default;
 

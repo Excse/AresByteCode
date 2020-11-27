@@ -3,9 +3,8 @@
 #include <iterator>
 #include <chrono>
 
-#include "reader/classreader.h"
-#include "visitor/vmcheck.h"
-#include "utils/utils.h"
+#include "../include/vmcheck.h"
+#include "../include/utils.h"
 
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
@@ -14,14 +13,11 @@ int main() {
     if (ares::readJarFile("/home/timo/Desktop/Banana.jar", configuration) == EXIT_FAILURE)
         return EXIT_FAILURE;
 
-    ares::ClassPool classPool(configuration.m_Classes);
-    for (const auto &classInfo : configuration.m_Classes) {
-        ares::VMCheck vmCheck;
-        vmCheck.visitClass(*classInfo);
-    }
+    ares::VMCheck vmCheck;
+    for (const auto &classInfo : configuration.m_Classes)
+        vmCheck.visitClass(*classInfo.second);
 
-    if (ares::writeJarFile("/home/timo/Desktop/Banana_OBF.jar",
-                           classPool, configuration) == EXIT_FAILURE)
+    if (ares::writeJarFile("/home/timo/Desktop/Banana_OBF.jar", configuration) == EXIT_FAILURE)
         return EXIT_FAILURE;
 
     auto stop = std::chrono::high_resolution_clock::now();

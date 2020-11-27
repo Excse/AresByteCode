@@ -2,9 +2,9 @@
 // Created by timo on 16.11.20.
 //
 
-#include "fieldinfo.h"
+#include "../../include/fieldinfo.h"
 
-#include "attributeinfo.h"
+#include "../../include/attributeinfo.h"
 
 ares::FieldInfo::FieldInfo() = default;
 
