@@ -13,7 +13,7 @@ auto ares::ClassInfo::is_valid_index(unsigned int index) const -> bool {
     return index > 0 && index < m_ConstantPoolCount;
 }
 
-auto ares::ClassInfo::has_access_flags(AccessFlag accessFlags) const -> bool {
+auto ares::ClassInfo::has_access_flag(AccessFlag accessFlags) const -> bool {
     return m_AccessFlags & accessFlags;
 }
 

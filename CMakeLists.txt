@@ -50,11 +50,11 @@ add_library(${PROJECT_NAME}_lib
         src/attributeinfo.cpp
         src/classinfo.cpp
         src/constantinfo.cpp
-    src/structure/fieldinfo.cpp
-    src/structure/methodinfo.cpp
-    src/utils/utils.cpp
-    src/visitor/vmcheck.cpp
-    src/writer/classwriter.cpp)
+        src/fieldinfo.cpp
+        src/methodinfo.cpp
+        src/utils.cpp
+        src/vmcheck.cpp
+        src/classwriter.cpp)
 
 target_link_libraries(${PROJECT_NAME}_lib zip)
 

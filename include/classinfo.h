@@ -58,7 +58,7 @@ public:
 public:
     [[nodiscard]] auto is_valid_index(unsigned int index) const -> bool;
 
-    [[nodiscard]] auto has_access_flags(AccessFlag accessFlags) const -> bool;
+    [[nodiscard]] auto has_access_flag(AccessFlag accessFlags) const -> bool;
 
     [[nodiscard]] auto size() const -> unsigned int;
 

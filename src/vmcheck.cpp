@@ -27,25 +27,25 @@ void ares::VMCheck::visit_class(ClassInfo &classInfo) {
         VMCheck::visit_classpool_info(classInfo, *constantPoolInfo);
     }
 
-    if (classInfo.has_access_flags(ClassInfo::INTERFACE)) {
-        if (!classInfo.has_access_flags(ClassInfo::ABSTRACT)
-            || classInfo.has_access_flags(ClassInfo::FINAL)
-            || classInfo.has_access_flags(ClassInfo::SUPER)
-            || classInfo.has_access_flags(ClassInfo::ENUM)
-            || classInfo.has_access_flags(ClassInfo::MODULE)) {
+    if (classInfo.has_access_flag(ClassInfo::INTERFACE)) {
+        if (!classInfo.has_access_flag(ClassInfo::ABSTRACT)
+            || classInfo.has_access_flag(ClassInfo::FINAL)
+            || classInfo.has_access_flag(ClassInfo::SUPER)
+            || classInfo.has_access_flag(ClassInfo::ENUM)
+            || classInfo.has_access_flag(ClassInfo::MODULE)) {
             std::cerr << "The class file has invalid interface access flags." << std::endl;
             abort();
         }
-    } else if (classInfo.has_access_flags(ClassInfo::ANNOTATION)) {
-        if (!classInfo.has_access_flags(ClassInfo::INTERFACE)
-            || classInfo.has_access_flags(ClassInfo::ABSTRACT)
-            || classInfo.has_access_flags(ClassInfo::FINAL)) {
+    } else if (classInfo.has_access_flag(ClassInfo::ANNOTATION)) {
+        if (!classInfo.has_access_flag(ClassInfo::INTERFACE)
+            || classInfo.has_access_flag(ClassInfo::ABSTRACT)
+            || classInfo.has_access_flag(ClassInfo::FINAL)) {
             std::cerr << "The class file has invalid annotation access flags." << std::endl;
             abort();
         }
-    } else if (classInfo.has_access_flags(ClassInfo::MODULE)) {
-        if (classInfo.has_access_flags(ClassInfo::ABSTRACT)
-            || classInfo.has_access_flags(ClassInfo::FINAL)) {
+    } else if (classInfo.has_access_flag(ClassInfo::MODULE)) {
+        if (classInfo.has_access_flag(ClassInfo::ABSTRACT)
+            || classInfo.has_access_flag(ClassInfo::FINAL)) {
             std::cerr << "The class file has invalid module access flags." << std::endl;
             abort();
         }
@@ -105,30 +105,30 @@ void ares::VMCheck::visit_class_interface(ClassInfo &classInfo,
 
 void ares::VMCheck::visit_class_field(ClassInfo &classInfo,
                                       FieldInfo &fieldInfo) {
-    if (fieldInfo.has_access_flags(FieldInfo::PUBLIC)) {
-        if (fieldInfo.has_access_flags(FieldInfo::PRIVATE)
-            || fieldInfo.has_access_flags(FieldInfo::PROTECTED)) {
+    if (fieldInfo.has_access_flag(FieldInfo::PUBLIC)) {
+        if (fieldInfo.has_access_flag(FieldInfo::PRIVATE)
+            || fieldInfo.has_access_flag(FieldInfo::PROTECTED)) {
             std::cerr << "The field has invalid public access flags." << std::endl;
             abort();
         }
-    } else if (fieldInfo.has_access_flags(FieldInfo::PRIVATE)) {
-        if (fieldInfo.has_access_flags(FieldInfo::PUBLIC)
-            || fieldInfo.has_access_flags(FieldInfo::PROTECTED)) {
+    } else if (fieldInfo.has_access_flag(FieldInfo::PRIVATE)) {
+        if (fieldInfo.has_access_flag(FieldInfo::PUBLIC)
+            || fieldInfo.has_access_flag(FieldInfo::PROTECTED)) {
             std::cerr << "The field has invalid private access flags." << std::endl;
             abort();
         }
-    } else if (fieldInfo.has_access_flags(FieldInfo::PROTECTED)) {
-        if (fieldInfo.has_access_flags(FieldInfo::PUBLIC)
-            || fieldInfo.has_access_flags(FieldInfo::PRIVATE)) {
+    } else if (fieldInfo.has_access_flag(FieldInfo::PROTECTED)) {
+        if (fieldInfo.has_access_flag(FieldInfo::PUBLIC)
+            || fieldInfo.has_access_flag(FieldInfo::PRIVATE)) {
             std::cerr << "The field has invalid protected access flags." << std::endl;
             abort();
         }
     }
 
-    if (classInfo.has_access_flags(ClassInfo::INTERFACE)) {
-        if (!fieldInfo.has_access_flags(FieldInfo::PUBLIC)
-            || !fieldInfo.has_access_flags(FieldInfo::STATIC)
-            || !fieldInfo.has_access_flags(FieldInfo::FINAL)) {
+    if (classInfo.has_access_flag(ClassInfo::INTERFACE)) {
+        if (!fieldInfo.has_access_flag(FieldInfo::PUBLIC)
+            || !fieldInfo.has_access_flag(FieldInfo::STATIC)
+            || !fieldInfo.has_access_flag(FieldInfo::FINAL)) {
             std::cerr << "Fields of interfaces need to have public, static and final access "
                          "modifier set." << std::endl;
             abort();
@@ -165,45 +165,45 @@ void ares::VMCheck::visit_class_field(ClassInfo &classInfo,
 //  https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.6
 void ares::VMCheck::visit_class_method(ClassInfo &classInfo,
                                        MethodInfo &methodInfo) {
-    if (methodInfo.has_access_flags(MethodInfo::PUBLIC)) {
-        if (methodInfo.has_access_flags(MethodInfo::PRIVATE)
-            || methodInfo.has_access_flags(MethodInfo::PROTECTED)) {
+    if (methodInfo.has_access_flag(MethodInfo::PUBLIC)) {
+        if (methodInfo.has_access_flag(MethodInfo::PRIVATE)
+            || methodInfo.has_access_flag(MethodInfo::PROTECTED)) {
             std::cerr << "The method has invalid public access flags." << std::endl;
             abort();
         }
-    } else if (methodInfo.has_access_flags(MethodInfo::PRIVATE)) {
-        if (methodInfo.has_access_flags(MethodInfo::PUBLIC)
-            || methodInfo.has_access_flags(MethodInfo::PROTECTED)) {
+    } else if (methodInfo.has_access_flag(MethodInfo::PRIVATE)) {
+        if (methodInfo.has_access_flag(MethodInfo::PUBLIC)
+            || methodInfo.has_access_flag(MethodInfo::PROTECTED)) {
             std::cerr << "The method has invalid private access flags." << std::endl;
             abort();
         }
-    } else if (methodInfo.has_access_flags(MethodInfo::PROTECTED)) {
-        if (methodInfo.has_access_flags(MethodInfo::PUBLIC)
-            || methodInfo.has_access_flags(MethodInfo::PRIVATE)) {
+    } else if (methodInfo.has_access_flag(MethodInfo::PROTECTED)) {
+        if (methodInfo.has_access_flag(MethodInfo::PUBLIC)
+            || methodInfo.has_access_flag(MethodInfo::PRIVATE)) {
             std::cerr << "The method has invalid protected access flags." << std::endl;
             abort();
         }
     }
 
-    if (classInfo.has_access_flags(ClassInfo::INTERFACE)) {
-        if (methodInfo.has_access_flags(MethodInfo::PROTECTED)
-            || methodInfo.has_access_flags(MethodInfo::FINAL)
-            || methodInfo.has_access_flags(MethodInfo::SYNCHRONIZED)
-            || methodInfo.has_access_flags(MethodInfo::NATIVE)) {
+    if (classInfo.has_access_flag(ClassInfo::INTERFACE)) {
+        if (methodInfo.has_access_flag(MethodInfo::PROTECTED)
+            || methodInfo.has_access_flag(MethodInfo::FINAL)
+            || methodInfo.has_access_flag(MethodInfo::SYNCHRONIZED)
+            || methodInfo.has_access_flag(MethodInfo::NATIVE)) {
             std::cerr << "The access flags for an interface methods are invalid." << std::endl;
             abort();
         }
 
         if (classInfo.m_ClassVersion < ClassInfo::VERSION_8) {
-            if (!methodInfo.has_access_flags(MethodInfo::PUBLIC)
-                || !methodInfo.has_access_flags(MethodInfo::ABSTRACT)) {
+            if (!methodInfo.has_access_flag(MethodInfo::PUBLIC)
+                || !methodInfo.has_access_flag(MethodInfo::ABSTRACT)) {
                 std::cerr << "The access flags for an interface methods are invalid."
                           << std::endl;
                 abort();
             }
         } else if (classInfo.m_ClassVersion >= ClassInfo::VERSION_8) {
-            if (methodInfo.has_access_flags(MethodInfo::PUBLIC)
-                && methodInfo.has_access_flags(MethodInfo::PRIVATE)) {
+            if (methodInfo.has_access_flag(MethodInfo::PUBLIC)
+                && methodInfo.has_access_flag(MethodInfo::PRIVATE)) {
                 std::cerr << "The access flags for an interface methods are invalid."
                           << std::endl;
                 abort();
@@ -211,13 +211,13 @@ void ares::VMCheck::visit_class_method(ClassInfo &classInfo,
         }
     }
 
-    if (methodInfo.has_access_flags(MethodInfo::ABSTRACT)) {
-        if (methodInfo.has_access_flags(MethodInfo::PRIVATE)
-            || methodInfo.has_access_flags(MethodInfo::STATIC)
-            || methodInfo.has_access_flags(MethodInfo::FINAL)
-            || methodInfo.has_access_flags(MethodInfo::SYNCHRONIZED)
-            || methodInfo.has_access_flags(MethodInfo::NATIVE)
-            || methodInfo.has_access_flags(MethodInfo::STRICT)) {
+    if (methodInfo.has_access_flag(MethodInfo::ABSTRACT)) {
+        if (methodInfo.has_access_flag(MethodInfo::PRIVATE)
+            || methodInfo.has_access_flag(MethodInfo::STATIC)
+            || methodInfo.has_access_flag(MethodInfo::FINAL)
+            || methodInfo.has_access_flag(MethodInfo::SYNCHRONIZED)
+            || methodInfo.has_access_flag(MethodInfo::NATIVE)
+            || methodInfo.has_access_flag(MethodInfo::STRICT)) {
             std::cerr << "The access flags for an interface methods are invalid."
                       << std::endl;
             abort();
@@ -238,12 +238,12 @@ void ares::VMCheck::visit_class_method(ClassInfo &classInfo,
     std::string name;
     name.assign((char *) methodName->m_Info.utf8_info.m_Bytes, methodName->m_Info.utf8_info.m_Length);
     if (name == "<init>") {
-        if (methodInfo.has_access_flags(MethodInfo::ABSTRACT)
-            || methodInfo.has_access_flags(MethodInfo::NATIVE)
-            || methodInfo.has_access_flags(MethodInfo::BRIDGE)
-            || methodInfo.has_access_flags(MethodInfo::SYNCHRONIZED)
-            || methodInfo.has_access_flags(MethodInfo::FINAL)
-            || methodInfo.has_access_flags(MethodInfo::STATIC)) {
+        if (methodInfo.has_access_flag(MethodInfo::ABSTRACT)
+            || methodInfo.has_access_flag(MethodInfo::NATIVE)
+            || methodInfo.has_access_flag(MethodInfo::BRIDGE)
+            || methodInfo.has_access_flag(MethodInfo::SYNCHRONIZED)
+            || methodInfo.has_access_flag(MethodInfo::FINAL)
+            || methodInfo.has_access_flag(MethodInfo::STATIC)) {
             std::cerr << "The access flags for an interface methods are invalid."
                       << std::endl;
             abort();

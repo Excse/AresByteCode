@@ -186,7 +186,7 @@ int ares::write_jar_file(const std::string &path, const Configuration &configura
     return EXIT_SUCCESS;
 }
 
-int ares::readU32(uint32_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+int ares::read_u32(uint32_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) {
     if (offset + 4 > size) {
         std::cerr << "Couldn't read u32 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -198,7 +198,7 @@ int ares::readU32(uint32_t &data, const uint8_t *byteCode, unsigned int size, un
     return EXIT_SUCCESS;
 }
 
-int ares::writeU32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+int ares::write_u32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
     if (offset + 4 > size) {
         std::cerr << "Couldn't read u32 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -212,7 +212,7 @@ int ares::writeU32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigne
     return EXIT_SUCCESS;
 }
 
-int ares::readU16(uint16_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+int ares::read_u16(uint16_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) {
     if (offset + 2 > size) {
         std::cerr << "Couldn't read u16 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -224,7 +224,7 @@ int ares::readU16(uint16_t &data, const uint8_t *byteCode, unsigned int size, un
     return EXIT_SUCCESS;
 }
 
-int ares::writeU16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+int ares::write_u16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
     if (offset + 2 > size) {
         std::cerr << "Couldn't write u16 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -236,7 +236,7 @@ int ares::writeU16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigne
     return EXIT_SUCCESS;
 }
 
-int ares::readU8(uint8_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+int ares::read_u8(uint8_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) {
     if (offset + 1 > size) {
         std::cerr << "Couldn't read u8 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -248,7 +248,7 @@ int ares::readU8(uint8_t &data, const uint8_t *byteCode, unsigned int size, unsi
     return EXIT_SUCCESS;
 }
 
-int ares::writeU8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+int ares::write_u8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
     if (offset + 1 > size) {
         std::cerr << "Couldn't write u8 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -259,7 +259,7 @@ int ares::writeU8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned 
     return EXIT_SUCCESS;
 }
 
-int ares::readU8Array(uint8_t *data, unsigned int length, uint8_t *byteCode, unsigned int size,
+int ares::read_u8_array(uint8_t *data, unsigned int length, uint8_t *byteCode, unsigned int size,
                       unsigned int &offset) {
     if (offset + (length * 1) > size) {
         std::cerr << "Couldn't read the u8 array because it is out of bounds." << std::endl;
@@ -272,7 +272,7 @@ int ares::readU8Array(uint8_t *data, unsigned int length, uint8_t *byteCode, uns
     return EXIT_SUCCESS;
 }
 
-int ares::writeU8Array(uint8_t *data, unsigned int dataSize, uint8_t *byteCode, unsigned int size,
+int ares::write_u8_array(uint8_t *data, unsigned int dataSize, uint8_t *byteCode, unsigned int size,
                        unsigned int &offset) {
     if (offset + (dataSize * 1) > size) {
         std::cerr << "Couldn't write the u8 array because it is out of bounds." << std::endl;
