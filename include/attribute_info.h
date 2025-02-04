@@ -13,36 +13,31 @@ struct AttributeInfo;
 
 union AttributeType {
     struct ExceptionEntry {
-        uint16_t m_StartPC;
-        uint16_t m_EndPC;
-        uint16_t m_HandlerPC;
-        uint16_t m_CatchType;
+        uint16_t start_pc;
+        uint16_t end_pc;
+        uint16_t handler_pc;
+        uint16_t catch_type;
     };
     struct Code {
-        uint16_t m_MaxStack;
-        uint16_t m_MaxLocals;
-        uint32_t m_CodeLength;
-        std::vector <uint8_t> m_Code;
-        uint16_t m_ExceptionTableLength;
-        std::vector <ExceptionEntry> m_ExceptionTable;
-        uint16_t m_AttributesCount;
-        std::vector <AttributeInfo> m_Attributes;
+        uint16_t max_stack;
+        uint16_t max_locals;
+        uint32_t code_length;
+        std::vector <uint8_t> code;
+        uint16_t exception_table_length;
+        std::vector <ExceptionEntry> exception_table;
+        uint16_t attributes_count;
+        std::vector <AttributeInfo> attributes;
     };
 };
 
 struct AttributeInfo {
 public:
-    AttributeInfo();
-
-    virtual ~AttributeInfo();
-
-public:
     [[nodiscard]] auto size() const -> unsigned int;
 
 public:
-    uint16_t m_AttributeNameIndex{};
-    uint32_t m_AttributeLength{};
-    std::vector <uint8_t> m_Info{};
+    uint16_t attribute_name_index{};
+    uint32_t attribute_length{};
+    std::vector <uint8_t> info{};
 };
 
 } // namespace ares

@@ -1,12 +1,46 @@
-#include "attributeinfo.h"
+#pragma once
 
-ares::AttributeInfo::AttributeInfo() = default;
+#include <unordered_map>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <memory>
+#include <vector>
+#include <list>
 
-ares::AttributeInfo::~AttributeInfo() = default;
+namespace ares {
 
-auto ares::AttributeInfo::size() const -> unsigned int {
-    return 6 + m_Info.size();
-}
+struct AttributeInfo;
+
+class ClassInfo;
+
+class FieldInfo {
+public:
+    enum AccessFlag : uint16_t {
+        PUBLIC = 0x0001,
+        PRIVATE = 0x0002,
+        PROTECTED = 0x0004,
+        STATIC = 0x0008,
+        FINAL = 0x0010,
+        VOLATILE = 0x0040,
+        TRANSIENT = 0x0080,
+        SYNTHETIC = 0x1000,
+        ENUM = 0x4000,
+    };
+
+public:
+    [[nodiscard]] auto has_access_flag(AccessFlag access_flag) const -> bool;
+
+    [[nodiscard]] auto size() const -> unsigned int;
+
+public:
+    uint16_t access_flags{};
+    uint16_t name_index{};
+    uint16_t descriptor_index{};
+    uint16_t attributes_count{};
+    std::vector <std::shared_ptr<AttributeInfo>> attributes{};
+};
+
+} // namespace ares
 
 //==============================================================================
 // BSD 3-Clause License

@@ -1,47 +1,36 @@
 #pragma once
 
-#include "attributeinfo.h"
-#include "constantinfo.h"
-#include "methodinfo.h"
-#include "classinfo.h"
-#include "fieldinfo.h"
 #include "visitor.h"
 
 namespace ares {
 
-class VMCheck : Visitor {
+class ClassWriter : Visitor {
 public:
-    void visit_class(ClassInfo &classInfo) override;
+    explicit ClassWriter(unsigned int offset = 0);
 
-    void visit_classpool_info(ClassInfo &classInfo, ConstantPoolInfo &constantPoolInfo) override;
+public:
+    void visit_class(ClassInfo &class_info) override;
 
-    void visit_class_interface(ClassInfo &classInfo, uint16_t interface) override;
+    [[nodiscard]] auto byte_code() const -> uint8_t *;
 
-    void visit_class_field(ClassInfo &classInfo, FieldInfo &fieldInfo) override;
+private:
+    void visit_classpool_info(ClassInfo &class_info, ConstantPoolInfo &info) override;
 
-    void visit_class_method(ClassInfo &classInfo, MethodInfo &methodInfo) override;
+    void visit_class_interface(ClassInfo &class_info, uint16_t interface) override;
 
-    void visit_class_attribute(ClassInfo &classInfo, AttributeInfo &attributeInfo) override;
+    void visit_class_field(ClassInfo &class_info, FieldInfo &field_info) override;
 
-    void visit_field_attribute(ClassInfo &classInfo, FieldInfo &fieldInfo, AttributeInfo &attributeInfo) override;
+    void visit_class_method(ClassInfo &class_info, MethodInfo &method_info) override;
 
-    void visit_method_attribute(ClassInfo &classInfo, MethodInfo &methodInfo, AttributeInfo &attributeInfo) override;
+    void visit_class_attribute(ClassInfo &class_info, AttributeInfo &attribute_info) override;
 
-    static void visit_class_info(ares::ClassInfo &classInfo, ares::ConstantInfo::ClassInfo &info);
+    void visit_field_attribute(ClassInfo &class_info, FieldInfo &field_info, AttributeInfo &attribute_info) override;
 
-    static void visit_field_method_info(ares::ClassInfo &classInfo, ConstantInfo::FieldMethodInfo &info);
+    void visit_method_attribute(ClassInfo &class_info, MethodInfo &method_info, AttributeInfo &attribute_info) override;
 
-    static void visit_name_and_type_info(ClassInfo &classInfo, ConstantInfo::NameAndTypeInfo &info);
-
-    static void visit_string_info(ClassInfo &classInfo, ConstantInfo::StringInfo &info);
-
-    static void visit_method_type_info(ClassInfo &classInfo, ConstantInfo::MethodTypeInfo &info);
-
-    static void visit_method_handle_info(ClassInfo &classInfo, ConstantInfo::MethodHandleInfo &info);
-
-    static void visit_dynamic_info(ClassInfo &classInfo, ConstantInfo::DynamicInfo &info);
-
-    static void visit_module_package_info(ClassInfo &classInfo, ConstantInfo::ModulePackageInfo &info);
+private:
+    unsigned int _offset{}, _size{};
+    uint8_t *_byte_code{};
 };
 
 } // namespace ares

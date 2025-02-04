@@ -9,104 +9,75 @@
 
 namespace ares {
 
-union ConstantInfo {
-    enum MethodHandleKind : uint16_t {
-        GetField = 1,
-        GetStatic = 2,
-        PutField = 3,
-        PutStatic = 4,
-        InvokeVirtual = 5,
-        InvokeStatic = 6,
-        InvokeSpecial = 7,
-        NewInvokeSpecial = 8,
-        InvokeInterface = 9,
+class ConstantPoolInfo;
+
+struct AttributeInfo;
+
+class MethodInfo;
+
+class FieldInfo;
+
+class ClassInfo {
+public:
+    enum AccessFlag : uint16_t {
+        PUBLIC = 0x0001,
+        FINAL = 0x0010,
+        SUPER = 0x0020,
+        INTERFACE = 0x0200,
+        ABSTRACT = 0x0400,
+        SYNTHETIC = 0x1000,
+        ANNOTATION = 0x2000,
+        ENUM = 0x4000,
+        MODULE = 0x8000,
     };
 
-    struct ClassInfo {
-        uint16_t m_NameIndex;
-    } class_info;
-
-    struct FieldMethodInfo {
-        uint16_t m_ClassIndex;
-        uint16_t m_NameAndTypeIndex;
-    } field_method_info;
-
-    struct StringInfo {
-        uint16_t m_StringIndex;
-    } string_info;
-
-    struct FloatIntegerInfo {
-        uint32_t m_Bytes;
-    } integer_float_info;
-
-    struct DoubleLongInfo {
-        uint32_t m_HighBytes;
-        uint32_t m_LowBytes;
-    } long_double_info;
-
-    struct NameAndTypeInfo {
-        uint16_t m_NameIndex;
-        uint16_t m_DescriptorIndex;
-    } name_and_type_info;
-
-    struct UTF8Info {
-        uint16_t m_Length;
-        uint8_t *m_Bytes;
-    } utf8_info;
-
-    struct MethodHandleInfo {
-        uint8_t m_ReferenceKind;
-        uint16_t m_ReferenceIndex;
-    } method_handle_info;
-
-    struct MethodTypeInfo {
-        uint16_t m_DescriptorIndex;
-    } method_type_info;
-
-    struct DynamicInfo {
-        uint16_t m_BoostrapMethodAttrIndex;
-        uint16_t m_NameAndTypeIndex;
-    } dynamic_info;
-
-    struct ModulePackageInfo {
-        uint16_t m_NameIndex;
-    } module_package_info;
-};
-
-class ConstantPoolInfo {
-public:
-    enum ConstantTag : uint8_t {
+    enum ClassVersion : uint16_t {
         UNDEFINED = 0,
-        UTF_8 = 1,
-        INTEGER = 3,
-        FLOAT = 4,
-        LONG = 5,
-        DOUBLE = 6,
-        CLASS = 7,
-        STRING = 8,
-        FIELD_REF = 9,
-        METHOD_REF = 10,
-        INTERFACE_METHOD_REF = 11,
-        NAME_AND_TYPE = 12,
-        METHOD_HANDLE = 15,
-        METHOD_TYPE = 16,
-        DYNAMIC = 17,
-        INVOKE_DYNAMIC = 18,
-        MODULE = 19,
-        PACKAGE = 20,
+        VERSION_1_1 = 45,
+        VERSION_1_2 = 46,
+        VERSION_1_3 = 47,
+        VERSION_1_4 = 48,
+        VERSION_5 = 49,
+        VERSION_6 = 50,
+        VERSION_7 = 51,
+        VERSION_8 = 52,
+        VERSION_9 = 53,
+        VERSION_10 = 54,
+        VERSION_11 = 55,
+        VERSION_12 = 56,
+        VERSION_13 = 57,
+        VERSION_14 = 58,
+        VERSION_15 = 59,
     };
 
 public:
-    ConstantPoolInfo();
+    [[nodiscard]] auto is_valid_index(unsigned int index) const -> bool;
 
-    virtual ~ConstantPoolInfo();
+    [[nodiscard]] auto has_access_flag(AccessFlag access_flag) const -> bool;
 
-public:
     [[nodiscard]] auto size() const -> unsigned int;
 
 public:
-    ConstantInfo m_Info{};
-    ConstantTag m_Tag{};
+    uint8_t *byte_code{};
+    unsigned int info_size{};
+
+    uint32_t magic_number{};
+    uint16_t minor_version{};
+    uint16_t major_version{};
+    ClassVersion class_version{};
+    uint16_t constant_pool_count{};
+    std::vector <std::shared_ptr<ConstantPoolInfo>> constant_pool{};
+    uint16_t access_flags{};
+    uint16_t this_class{};
+    uint16_t super_class{};
+    uint16_t interfaces_count{};
+    std::vector <uint16_t> interfaces{};
+    uint16_t fields_count{};
+    std::vector <std::shared_ptr<FieldInfo>> fields{};
+    uint16_t method_count{};
+    std::vector <std::shared_ptr<MethodInfo>> methods{};
+    uint16_t attributes_count{};
+    std::vector <std::shared_ptr<AttributeInfo>> attributes{};
 };
 
 } // namespace ares

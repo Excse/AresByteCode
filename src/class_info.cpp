@@ -1,32 +1,33 @@
-#pragma once
-
-#include "attribute_info.h"
-#include "method_info.h"
-#include "field_info.h"
 #include "class_info.h"
 
-namespace ares {
+#include "attribute_info.h"
+#include "constant_info.h"
+#include "method_info.h"
+#include "field_info.h"
 
-class Visitor {
-public:
-    virtual void visit_class(ClassInfo &classInfo) = 0;
+auto ares::ClassInfo::is_valid_index(unsigned int index) const -> bool {
+    return index > 0 && index < constant_pool_count;
+}
 
-    virtual void visit_classpool_info(ClassInfo &classInfo, ConstantPoolInfo &constantPoolInfo) = 0;
+auto ares::ClassInfo::has_access_flag(AccessFlag access_flag) const -> bool {
+    return access_flags & access_flag;
+}
 
-    virtual void visit_class_interface(ClassInfo &classInfo, uint16_t interface) = 0;
-
-    virtual void visit_class_field(ClassInfo &classInfo, FieldInfo &fieldInfo) = 0;
-
-    virtual void visit_class_method(ClassInfo &classInfo, MethodInfo &methodInfo) = 0;
-
-    virtual void visit_class_attribute(ClassInfo &classInfo, AttributeInfo &attributeInfo) = 0;
-
-    virtual void visit_field_attribute(ClassInfo &classInfo, FieldInfo &fieldInfo, AttributeInfo &attributeInfo) = 0;
-
-    virtual void visit_method_attribute(ClassInfo &classInfo, MethodInfo &methodInfo, AttributeInfo &attributeInfo) = 0;
-};
-
-} // namespace ares
+auto ares::ClassInfo::size() const -> unsigned int {
+    size_t size = 24 + 2 * interfaces_count;
+    for(const auto &constantPoolInfo : constant_pool) {
+        if(!constantPoolInfo)
+            continue;
+        size += constantPoolInfo->size();
+    }
+    for(const auto &fieldInfo : fields)
+        size += fieldInfo->size();
+    for(const auto &methodInfo : methods)
+        size += methodInfo->size();
+    for(const auto &attributeInfo : attributes)
+        size += attributeInfo->size();
+    return size;
+}
 
 //==============================================================================
 // BSD 3-Clause License

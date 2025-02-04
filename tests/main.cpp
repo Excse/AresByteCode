@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-#include "../include/vmcheck.h"
+#include "../include/vm_check.h"
 #include "../include/utils.h"
 
 TEST(General, Works) {
@@ -16,7 +16,7 @@ TEST(General, Works) {
     }
 
     ares::VMCheck vmCheck;
-    for (const auto &classInfo : configuration.m_Classes)
+    for (const auto &classInfo : configuration.classes)
         vmCheck.visit_class(*classInfo.second);
 
     if (ares::write_jar_file("/home/timo/Desktop/Banana_OBF.jar", configuration) == EXIT_FAILURE) {

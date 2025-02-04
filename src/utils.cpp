@@ -6,25 +6,17 @@
 
 #include <zip.h>
 
-#include "classreader.h"
-#include "classwriter.h"
+#include "class_reader.h"
+#include "class_writer.h"
 
-ares::Manifest::Manifest() = default;
-
-ares::Manifest::~Manifest() = default;
-
-std::string ares::Manifest::content() {
+auto ares::Manifest::content() -> std::string {
     std::stringstream content;
-    for (const auto &line : m_Data)
+    for (const auto &line : data)
         content << line.first << ": " << line.second << std::endl;
     return content.str();
 }
 
-ares::Configuration::Configuration() = default;
-
-ares::Configuration::~Configuration() = default;
-
-int ares::read_manifest(std::string &content, Manifest &manifest) {
+auto ares::read_manifest(std::string &content, Manifest &manifest) -> int {
     std::size_t current = content.find('\n'), previous = 0;
     while (current != std::string::npos) {
         auto line = content.substr(previous, current - previous);
@@ -39,13 +31,13 @@ int ares::read_manifest(std::string &content, Manifest &manifest) {
         auto key = line.substr(0, delimiterPos);
         auto value = line.substr(delimiterPos + 1);
 
-        manifest.m_Data.emplace(key, value);
+        manifest.data.emplace(key, value);
     }
 
     return EXIT_SUCCESS;
 }
 
-int ares::read_jar_file(const std::string &path, Configuration &configuration) {
+auto ares::read_jar_file(const std::string &path, Configuration &configuration) -> int {
     auto correctSuffix = path.find(".jar", path.size() - 4) != std::string::npos;
     if (!correctSuffix) {
         std::cerr << "You can only enter \".jar\" files." << std::endl;
@@ -78,24 +70,24 @@ int ares::read_jar_file(const std::string &path, Configuration &configuration) {
             auto manifest = std::make_shared<Manifest>();
             auto content = std::string((char *) arrayContents);
             ares::read_manifest(content, *manifest);
-            configuration.m_Manifest = manifest;
+            configuration.manifest = manifest;
         } else if (name.find(".class", name.size() - 6) != std::string::npos) {
             auto classInfo = std::make_shared<ClassInfo>();
-            classInfo->m_ByteCode = arrayContents;
-            classInfo->m_Size = stat.size;
+            classInfo->byte_code = arrayContents;
+            classInfo->info_size = stat.size;
 
-            configuration.m_Classes.emplace(name, classInfo);
+            configuration.classes.emplace(name, classInfo);
 
             ClassReader classReader;
             classReader.visit_class(*classInfo);
 
-            if (classReader.offset() != classInfo->m_Size) {
+            if (classReader.offset() != classInfo->info_size) {
                 std::cerr << "The offset after reading the class doesn't match the class size"
                           << std::endl;
                 return EXIT_FAILURE;
             }
         } else {
-            configuration.m_Others.emplace(name, std::pair<uint8_t *, unsigned int>(
+            configuration.others.emplace(name, std::pair<uint8_t *, unsigned int>(
                     arrayContents, stat.size));
         }
     }
@@ -105,7 +97,7 @@ int ares::read_jar_file(const std::string &path, Configuration &configuration) {
     return EXIT_SUCCESS;
 }
 
-int ares::write_jar_file(const std::string &path, const Configuration &configuration) {
+auto ares::write_jar_file(const std::string &path, const Configuration &configuration) -> int {
     auto correctSuffix = path.find(".jar", path.size() - 4) != std::string::npos;
     if (!correctSuffix) {
         std::cerr << "You can only enter \".jar\" files." << std::endl;
@@ -125,7 +117,7 @@ int ares::write_jar_file(const std::string &path, const Configuration &configura
     }
 
     std::vector<uint8_t *> releaseHeap;
-    for (const auto &classInfo : configuration.m_Classes) {
+    for (const auto &classInfo : configuration.classes) {
         ares::ClassWriter classWriter;
         classWriter.visit_class(*classInfo.second);
 
@@ -151,7 +143,7 @@ int ares::write_jar_file(const std::string &path, const Configuration &configura
         }
     }
 
-    for (const auto &other : configuration.m_Others) {
+    for (const auto &other : configuration.others) {
         auto source = zip_source_buffer(zip, other.second.first, other.second.second, 0);
         if (source == nullptr) {
             std::cerr << zip_strerror(zip) << std::endl;
@@ -165,7 +157,7 @@ int ares::write_jar_file(const std::string &path, const Configuration &configura
         }
     }
 
-    auto manifest = configuration.m_Manifest->content();
+    auto manifest = configuration.manifest->content();
     auto source = zip_source_buffer(zip, manifest.data(), manifest.size(), 0);
     if (source == nullptr) {
         std::cerr << zip_strerror(zip) << std::endl;
@@ -186,7 +178,7 @@ int ares::write_jar_file(const std::string &path, const Configuration &configura
     return EXIT_SUCCESS;
 }
 
-int ares::read_u32(uint32_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+auto ares::read_u32(uint32_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
     if (offset + 4 > size) {
         std::cerr << "Couldn't read u32 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -198,7 +190,7 @@ int ares::read_u32(uint32_t &data, const uint8_t *byteCode, unsigned int size, u
     return EXIT_SUCCESS;
 }
 
-int ares::write_u32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+auto ares::write_u32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
     if (offset + 4 > size) {
         std::cerr << "Couldn't read u32 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -212,7 +204,7 @@ int ares::write_u32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsign
     return EXIT_SUCCESS;
 }
 
-int ares::read_u16(uint16_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+auto ares::read_u16(uint16_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
     if (offset + 2 > size) {
         std::cerr << "Couldn't read u16 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -224,7 +216,7 @@ int ares::read_u16(uint16_t &data, const uint8_t *byteCode, unsigned int size, u
     return EXIT_SUCCESS;
 }
 
-int ares::write_u16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+auto ares::write_u16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
     if (offset + 2 > size) {
         std::cerr << "Couldn't write u16 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -236,7 +228,7 @@ int ares::write_u16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsign
     return EXIT_SUCCESS;
 }
 
-int ares::read_u8(uint8_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+auto ares::read_u8(uint8_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
     if (offset + 1 > size) {
         std::cerr << "Couldn't read u8 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -248,7 +240,7 @@ int ares::read_u8(uint8_t &data, const uint8_t *byteCode, unsigned int size, uns
     return EXIT_SUCCESS;
 }
 
-int ares::write_u8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) {
+auto ares::write_u8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
     if (offset + 1 > size) {
         std::cerr << "Couldn't write u8 because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -259,8 +251,8 @@ int ares::write_u8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned
     return EXIT_SUCCESS;
 }
 
-int ares::read_u8_array(uint8_t *data, unsigned int length, uint8_t *byteCode, unsigned int size,
-                      unsigned int &offset) {
+auto ares::read_u8_array(uint8_t *data, unsigned int length, uint8_t *byteCode, unsigned int size,
+                         unsigned int &offset) -> int {
     if (offset + (length * 1) > size) {
         std::cerr << "Couldn't read the u8 array because it is out of bounds." << std::endl;
         return EXIT_FAILURE;
@@ -272,8 +264,8 @@ int ares::read_u8_array(uint8_t *data, unsigned int length, uint8_t *byteCode, u
     return EXIT_SUCCESS;
 }
 
-int ares::write_u8_array(uint8_t *data, unsigned int dataSize, uint8_t *byteCode, unsigned int size,
-                       unsigned int &offset) {
+auto ares::write_u8_array(uint8_t *data, unsigned int dataSize, uint8_t *byteCode, unsigned int size,
+                          unsigned int &offset) -> int {
     if (offset + (dataSize * 1) > size) {
         std::cerr << "Couldn't write the u8 array because it is out of bounds." << std::endl;
         return EXIT_FAILURE;

@@ -1,36 +1,32 @@
-#include "classinfo.h"
+#include "constant_info.h"
 
-#include "attributeinfo.h"
-#include "constantinfo.h"
-#include "methodinfo.h"
-#include "fieldinfo.h"
-
-ares::ClassInfo::ClassInfo() = default;
-
-ares::ClassInfo::~ClassInfo() = default;
-
-auto ares::ClassInfo::is_valid_index(unsigned int index) const -> bool {
-    return index > 0 && index < m_ConstantPoolCount;
-}
-
-auto ares::ClassInfo::has_access_flag(AccessFlag accessFlags) const -> bool {
-    return m_AccessFlags & accessFlags;
-}
-
-auto ares::ClassInfo::size() const -> unsigned int {
-    size_t size = 24 + 2 * m_InterfacesCount;
-    for(const auto &constantPoolInfo : m_ConstantPool) {
-        if(!constantPoolInfo)
-            continue;
-        size += constantPoolInfo->size();
+auto ares::ConstantPoolInfo::size() const -> unsigned int {
+    switch (tag) {
+        case UTF_8:
+            return 3 + info.utf8_info.length;
+        case INTEGER:
+        case FLOAT:
+        case FIELD_REF:
+        case METHOD_REF:
+        case INTERFACE_METHOD_REF:
+        case NAME_AND_TYPE:
+        case DYNAMIC:
+        case INVOKE_DYNAMIC:
+            return 5;
+        case LONG:
+        case DOUBLE:
+            return 9;
+        case STRING:
+        case CLASS:
+        case METHOD_TYPE:
+        case MODULE:
+        case PACKAGE:
+            return 3;
+        case METHOD_HANDLE:
+            return 4;
+        default:
+            abort();
     }
-    for(const auto &fieldInfo : m_Fields)
-        size += fieldInfo->size();
-    for(const auto &methodInfo : m_Methods)
-        size += methodInfo->size();
-    for(const auto &attributeInfo : m_Attributes)
-        size += attributeInfo->size();
-    return size;
 }
 
 //==============================================================================

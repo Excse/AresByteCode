@@ -1,18 +1,14 @@
-#include "methodinfo.h"
+#include "method_info.h"
 
-#include "attributeinfo.h"
+#include "attribute_info.h"
 
-ares::MethodInfo::MethodInfo() = default;
-
-ares::MethodInfo::~MethodInfo() = default;
-
-bool ares::MethodInfo::has_access_flag(AccessFlag accessFlags) const {
-    return m_AccessFlags & accessFlags;
+auto ares::MethodInfo::has_access_flag(AccessFlag access_flag) const -> bool {
+    return access_flags & access_flag;
 }
 
-unsigned int ares::MethodInfo::size() const {
-    auto size = 8;
-    for(const auto &attributeInfo : m_Attributes)
+auto ares::MethodInfo::size() const -> unsigned int {
+    size_t size = 8;
+    for(const auto &attributeInfo : attributes)
         size += attributeInfo->size();
     return size;
 }

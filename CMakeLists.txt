@@ -46,15 +46,15 @@ FetchContent_MakeAvailable(libzip)
 include_directories(include)
 
 add_library(${PROJECT_NAME}_lib
-        src/classreader.cpp
-        src/attributeinfo.cpp
-        src/classinfo.cpp
-        src/constantinfo.cpp
-        src/fieldinfo.cpp
-        src/methodinfo.cpp
+        src/class_reader.cpp
+        src/attribute_info.cpp
+        src/class_info.cpp
+        src/constant_info.cpp
+        src/field_info.cpp
+        src/method_info.cpp
         src/utils.cpp
-        src/vmcheck.cpp
-        src/classwriter.cpp)
+        src/vm_check.cpp
+        src/class_writer.cpp)
 
 target_link_libraries(${PROJECT_NAME}_lib zip)
 

@@ -1,41 +1,17 @@
-#pragma once
+#include "field_info.h"
 
-#include "visitor.h"
+#include "attribute_info.h"
 
-namespace ares {
+auto ares::FieldInfo::has_access_flag(AccessFlag access_flag) const -> bool {
+    return access_flags & access_flag;
+}
 
-class ClassWriter : Visitor {
-public:
-    explicit ClassWriter(unsigned int offset = 0);
-
-    virtual ~ClassWriter();
-
-public:
-    void visit_class(ClassInfo &classInfo) override;
-
-    [[nodiscard]] auto byte_code() const -> uint8_t *;
-
-private:
-    void visit_classpool_info(ClassInfo &classInfo, ConstantPoolInfo &info) override;
-
-    void visit_class_interface(ClassInfo &classInfo, uint16_t interface) override;
-
-    void visit_class_field(ClassInfo &classInfo, FieldInfo &fieldInfo) override;
-
-    void visit_class_method(ClassInfo &classInfo, MethodInfo &methodInfo) override;
-
-    void visit_class_attribute(ClassInfo &classInfo, AttributeInfo &attributeInfo) override;
-
-    void visit_field_attribute(ClassInfo &classInfo, FieldInfo &fieldInfo, AttributeInfo &attributeInfo) override;
-
-    void visit_method_attribute(ClassInfo &classInfo, MethodInfo &methodInfo, AttributeInfo &attributeInfo) override;
-
-private:
-    unsigned int m_Offset{}, m_Size{};
-    uint8_t *m_ByteCode{};
-};
-
-} // namespace ares
+auto ares::FieldInfo::size() const -> unsigned int {
+    size_t size = 8;
+    for(const auto &attribute : attributes)
+        size += attribute->size();
+    return size;
+}
 
 //==============================================================================
 // BSD 3-Clause License

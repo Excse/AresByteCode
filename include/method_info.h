@@ -1,21 +1,47 @@
-#include "fieldinfo.h"
+#pragma once
 
-#include "attributeinfo.h"
+#include <unordered_map>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <memory>
+#include <vector>
+#include <list>
 
-ares::FieldInfo::FieldInfo() = default;
+namespace ares {
 
-ares::FieldInfo::~FieldInfo() = default;
+struct AttributeInfo;
 
-bool ares::FieldInfo::has_access_flag(AccessFlag accessFlags) const {
-    return m_AccessFlags & accessFlags;
-}
+class MethodInfo {
+public:
+    enum AccessFlag : uint16_t {
+        PUBLIC = 0x0001,
+        PRIVATE = 0x0002,
+        PROTECTED = 0x0004,
+        STATIC = 0x0008,
+        FINAL = 0x0010,
+        SYNCHRONIZED = 0x0020,
+        BRIDGE = 0x0040,
+        VARARGS = 0x0080,
+        NATIVE = 0x0100,
+        ABSTRACT = 0x0400,
+        STRICT = 0x0800,
+        SYNTHETIC = 0x1000,
+    };
 
-unsigned int ares::FieldInfo::size() const {
-    auto size = 8;
-    for(const auto &attribute : m_Attributes)
-        size += attribute->size();
-    return size;
-}
+public:
+    [[nodiscard]] auto has_access_flag(AccessFlag access_flag) const -> bool;
+
+    [[nodiscard]] auto size() const -> unsigned int;
+
+public:
+    uint16_t access_flags{};
+    uint16_t name_index{};
+    uint16_t descriptor_index{};
+    uint16_t attributes_count{};
+    std::vector <std::shared_ptr<AttributeInfo>> attributes{};
+};
+
+} // namespace ares
 
 //==============================================================================
 // BSD 3-Clause License

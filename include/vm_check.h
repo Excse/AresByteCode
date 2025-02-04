@@ -1,29 +1,47 @@
 #pragma once
 
 #include "attribute_info.h"
+#include "constant_info.h"
 #include "method_info.h"
-#include "field_info.h"
 #include "class_info.h"
+#include "field_info.h"
+#include "visitor.h"
 
 namespace ares {
 
-class Visitor {
+class VMCheck : Visitor {
 public:
-    virtual void visit_class(ClassInfo &classInfo) = 0;
+    void visit_class(ClassInfo &classInfo) override;
 
-    virtual void visit_classpool_info(ClassInfo &classInfo, ConstantPoolInfo &constantPoolInfo) = 0;
+    void visit_classpool_info(ClassInfo &classInfo, ConstantPoolInfo &constantPoolInfo) override;
 
-    virtual void visit_class_interface(ClassInfo &classInfo, uint16_t interface) = 0;
+    void visit_class_interface(ClassInfo &classInfo, uint16_t interface) override;
 
-    virtual void visit_class_field(ClassInfo &classInfo, FieldInfo &fieldInfo) = 0;
+    void visit_class_field(ClassInfo &classInfo, FieldInfo &fieldInfo) override;
 
-    virtual void visit_class_method(ClassInfo &classInfo, MethodInfo &methodInfo) = 0;
+    void visit_class_method(ClassInfo &classInfo, MethodInfo &methodInfo) override;
 
-    virtual void visit_class_attribute(ClassInfo &classInfo, AttributeInfo &attributeInfo) = 0;
+    void visit_class_attribute(ClassInfo &classInfo, AttributeInfo &attributeInfo) override;
 
-    virtual void visit_field_attribute(ClassInfo &classInfo, FieldInfo &fieldInfo, AttributeInfo &attributeInfo) = 0;
+    void visit_field_attribute(ClassInfo &classInfo, FieldInfo &fieldInfo, AttributeInfo &attributeInfo) override;
 
-    virtual void visit_method_attribute(ClassInfo &classInfo, MethodInfo &methodInfo, AttributeInfo &attributeInfo) = 0;
+    void visit_method_attribute(ClassInfo &classInfo, MethodInfo &methodInfo, AttributeInfo &attributeInfo) override;
+
+    static void visit_class_info(ares::ClassInfo &classInfo, ares::ConstantInfo::ClassInfo &info);
+
+    static void visit_field_method_info(ares::ClassInfo &classInfo, ConstantInfo::FieldMethodInfo &info);
+
+    static void visit_name_and_type_info(ClassInfo &classInfo, ConstantInfo::NameAndTypeInfo &info);
+
+    static void visit_string_info(ClassInfo &classInfo, ConstantInfo::StringInfo &info);
+
+    static void visit_method_type_info(ClassInfo &classInfo, ConstantInfo::MethodTypeInfo &info);
+
+    static void visit_method_handle_info(ClassInfo &classInfo, ConstantInfo::MethodHandleInfo &info);
+
+    static void visit_dynamic_info(ClassInfo &classInfo, ConstantInfo::DynamicInfo &info);
+
+    static void visit_module_package_info(ClassInfo &classInfo, ConstantInfo::ModulePackageInfo &info);
 };
 
 } // namespace ares

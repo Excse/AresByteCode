@@ -5,33 +5,23 @@
 #include <vector>
 #include <memory>
 
-#include "classinfo.h"
+#include "class_info.h"
 
 namespace ares {
 
 class Manifest {
 public:
-    Manifest();
-
-    virtual ~Manifest();
-
-public:
     [[nodiscard]] auto content() -> std::string;
 
 public:
-    std::unordered_map <std::string, std::string> m_Data{};
+    std::unordered_map <std::string, std::string> data{};
 };
 
 class Configuration {
 public:
-    Configuration();
-
-    virtual ~Configuration();
-
-public:
-    std::unordered_map <std::string, std::pair<uint8_t *, unsigned int>> m_Others{};
-    std::unordered_map <std::string, std::shared_ptr<ClassInfo>> m_Classes{};
-    std::shared_ptr <Manifest> m_Manifest{};
+    std::unordered_map <std::string, std::pair<uint8_t *, unsigned int>> others{};
+    std::unordered_map <std::string, std::shared_ptr<ClassInfo>> classes{};
+    std::shared_ptr <Manifest> manifest{};
 };
 
 auto read_manifest(std::string &content, Manifest &manifest) -> int;
@@ -41,43 +31,43 @@ auto read_jar_file(const std::string &path, Configuration &configuration) -> int
 auto write_jar_file(const std::string &path, const Configuration &configuration) -> int;
 
 auto read_u32(uint32_t & data,
-              const uint8_t *byteCode,
+              const uint8_t *byte_code,
               unsigned int size,
               unsigned int &offset) -> int;
 
 auto write_u32(uint32_t & data,
-               uint8_t * byteCode,
+               uint8_t * byte_code,
                unsigned int size,
                unsigned int &offset) -> int;
 
 auto read_u16(uint16_t & data,
-              const uint8_t *byteCode,
+              const uint8_t *byte_code,
               unsigned int size,
               unsigned int &offset) -> int;
 
 auto write_u16(uint16_t & data,
-               uint8_t * byteCode,
+               uint8_t * byte_code,
                unsigned int size,
                unsigned int &offset) -> int;
 
 auto read_u8(uint8_t & data,
-             const uint8_t *byteCode,
+             const uint8_t *byte_code,
              unsigned int size,
              unsigned int &offset) -> int;
 
 auto write_u8(uint8_t & data,
-              uint8_t * byteCode,
+              uint8_t * byte_code,
               unsigned int size,
               unsigned int &offset) -> int;
 
 auto read_u8_array(uint8_t * data,
-                   unsigned int length, uint8_t *byteCode,
+                   unsigned int length, uint8_t *byte_code,
                    unsigned int size,
                    unsigned int &offset) -> int;
 
 auto write_u8_array(uint8_t * data,
                     unsigned int dataSize,
-                    uint8_t *byteCode,
+                    uint8_t *byte_code,
                     unsigned int size,
                     unsigned int &offset) -> int;
 
