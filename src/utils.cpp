@@ -13,18 +13,18 @@ ares::Manifest::Manifest() = default;
 
 ares::Manifest::~Manifest() = default;
 
-std::string ares::Manifest::getContent() {
+std::string ares::Manifest::content() {
     std::stringstream content;
     for (const auto &line : m_Data)
         content << line.first << ": " << line.second << std::endl;
     return content.str();
 }
 
-ares::AresConfiguration::AresConfiguration() = default;
+ares::Configuration::Configuration() = default;
 
-ares::AresConfiguration::~AresConfiguration() = default;
+ares::Configuration::~Configuration() = default;
 
-int ares::readManifest(std::string &content, ares::Manifest &manifest) {
+int ares::read_manifest(std::string &content, Manifest &manifest) {
     std::size_t current = content.find('\n'), previous = 0;
     while (current != std::string::npos) {
         auto line = content.substr(previous, current - previous);
@@ -45,7 +45,7 @@ int ares::readManifest(std::string &content, ares::Manifest &manifest) {
     return EXIT_SUCCESS;
 }
 
-int ares::readJarFile(const std::string &path, ares::AresConfiguration &configuration) {
+int ares::read_jar_file(const std::string &path, Configuration &configuration) {
     auto correctSuffix = path.find(".jar", path.size() - 4) != std::string::npos;
     if (!correctSuffix) {
         std::cerr << "You can only enter \".jar\" files." << std::endl;
@@ -77,7 +77,7 @@ int ares::readJarFile(const std::string &path, ares::AresConfiguration &configur
         if (name == "META-INF/MANIFEST.MF") {
             auto manifest = std::make_shared<Manifest>();
             auto content = std::string((char *) arrayContents);
-            ares::readManifest(content, *manifest);
+            ares::read_manifest(content, *manifest);
             configuration.m_Manifest = manifest;
         } else if (name.find(".class", name.size() - 6) != std::string::npos) {
             auto classInfo = std::make_shared<ClassInfo>();
@@ -87,9 +87,9 @@ int ares::readJarFile(const std::string &path, ares::AresConfiguration &configur
             configuration.m_Classes.emplace(name, classInfo);
 
             ClassReader classReader;
-            classReader.visitClass(*classInfo);
+            classReader.visit_class(*classInfo);
 
-            if (classReader.getOffset() != classInfo->m_Size) {
+            if (classReader.offset() != classInfo->m_Size) {
                 std::cerr << "The offset after reading the class doesn't match the class size"
                           << std::endl;
                 return EXIT_FAILURE;
@@ -105,7 +105,7 @@ int ares::readJarFile(const std::string &path, ares::AresConfiguration &configur
     return EXIT_SUCCESS;
 }
 
-int ares::writeJarFile(const std::string &path, const ares::AresConfiguration &configuration) {
+int ares::write_jar_file(const std::string &path, const Configuration &configuration) {
     auto correctSuffix = path.find(".jar", path.size() - 4) != std::string::npos;
     if (!correctSuffix) {
         std::cerr << "You can only enter \".jar\" files." << std::endl;
@@ -127,10 +127,10 @@ int ares::writeJarFile(const std::string &path, const ares::AresConfiguration &c
     std::vector<uint8_t *> releaseHeap;
     for (const auto &classInfo : configuration.m_Classes) {
         ares::ClassWriter classWriter;
-        classWriter.visitClass(*classInfo.second);
+        classWriter.visit_class(*classInfo.second);
 
-        auto stackByteCode = classWriter.getByteCode();
-        auto classSize = classInfo.second->getSize();
+        auto stackByteCode = classWriter.byte_code();
+        auto classSize = classInfo.second->size();
 
         auto heapByteCode = new uint8_t[classSize];
         for (size_t index = 0; index < classSize; index++) {
@@ -165,7 +165,7 @@ int ares::writeJarFile(const std::string &path, const ares::AresConfiguration &c
         }
     }
 
-    auto manifest = configuration.m_Manifest->getContent();
+    auto manifest = configuration.m_Manifest->content();
     auto source = zip_source_buffer(zip, manifest.data(), manifest.size(), 0);
     if (source == nullptr) {
         std::cerr << zip_strerror(zip) << std::endl;
@@ -267,7 +267,7 @@ int ares::readU8Array(uint8_t *data, unsigned int length, uint8_t *byteCode, uns
     }
 
     for (size_t index = 0; index < length; index++)
-        readU8(data[index], byteCode, size, offset);
+        read_u8(data[index], byteCode, size, offset);
 
     return EXIT_SUCCESS;
 }
@@ -280,7 +280,7 @@ int ares::writeU8Array(uint8_t *data, unsigned int dataSize, uint8_t *byteCode, 
     }
 
     for (size_t index = 0; index < dataSize; index++)
-        writeU8(data[index], byteCode, size, offset);
+        write_u8(data[index], byteCode, size, offset);
 
     return EXIT_SUCCESS;
 }

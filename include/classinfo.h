@@ -56,11 +56,11 @@ public:
     virtual ~ClassInfo();
 
 public:
-    [[nodiscard]] bool isIndexValid(unsigned int index) const;
+    [[nodiscard]] auto is_valid_index(unsigned int index) const -> bool;
 
-    [[nodiscard]] bool hasAccessFlag(AccessFlag accessFlags) const;
+    [[nodiscard]] auto has_access_flags(AccessFlag accessFlags) const -> bool;
 
-    [[nodiscard]] unsigned int getSize() const;
+    [[nodiscard]] auto size() const -> unsigned int;
 
 public:
     uint8_t *m_ByteCode{};

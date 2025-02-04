@@ -46,10 +46,10 @@ FetchContent_MakeAvailable(libzip)
 include_directories(include)
 
 add_library(${PROJECT_NAME}_lib
-    src/reader/classreader.cpp
-    src/structure/attributeinfo.cpp
-    src/structure/classinfo.cpp
-    src/structure/constantinfo.cpp
+        src/classreader.cpp
+        src/attributeinfo.cpp
+        src/classinfo.cpp
+        src/constantinfo.cpp
     src/structure/fieldinfo.cpp
     src/structure/methodinfo.cpp
     src/utils/utils.cpp

@@ -33,9 +33,9 @@ public:
     virtual ~FieldInfo();
 
 public:
-    [[nodiscard]] bool hasAccessFlag(AccessFlag accessFlags) const;
+    [[nodiscard]] auto has_access_flag(AccessFlag accessFlags) const -> bool;
 
-    [[nodiscard]] unsigned int getSize() const;
+    [[nodiscard]] auto size() const -> unsigned int;
 
 public:
     uint16_t m_AccessFlags{};

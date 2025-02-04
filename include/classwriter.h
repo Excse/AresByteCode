@@ -11,33 +11,24 @@ public:
     virtual ~ClassWriter();
 
 public:
-    void visitClass(ClassInfo &classInfo) override;
+    void visit_class(ClassInfo &classInfo) override;
 
-    [[nodiscard]] uint8_t *getByteCode() const;
+    [[nodiscard]] auto byte_code() const -> uint8_t *;
 
 private:
-    void visitClassCPInfo(ares::ClassInfo &classInfo,
-                          ares::ConstantPoolInfo &info) override;
+    void visit_classpool_info(ClassInfo &classInfo, ConstantPoolInfo &info) override;
 
-    void visitClassInterface(ares::ClassInfo &classInfo,
-                             uint16_t interface) override;
+    void visit_class_interface(ClassInfo &classInfo, uint16_t interface) override;
 
-    void visitClassField(ares::ClassInfo &classInfo,
-                         ares::FieldInfo &fieldInfo) override;
+    void visit_class_field(ClassInfo &classInfo, FieldInfo &fieldInfo) override;
 
-    void visitClassMethod(ares::ClassInfo &classInfo,
-                          ares::MethodInfo &methodInfo) override;
+    void visit_class_method(ClassInfo &classInfo, MethodInfo &methodInfo) override;
 
-    void visitClassAttribute(ares::ClassInfo &classInfo,
-                             ares::AttributeInfo &attributeInfo) override;
+    void visit_class_attribute(ClassInfo &classInfo, AttributeInfo &attributeInfo) override;
 
-    void visitFieldAttribute(ares::ClassInfo &classInfo,
-                             ares::FieldInfo &fieldInfo,
-                             ares::AttributeInfo &attributeInfo) override;
+    void visit_field_attribute(ClassInfo &classInfo, FieldInfo &fieldInfo, AttributeInfo &attributeInfo) override;
 
-    void visitMethodAttribute(ares::ClassInfo &classInfo,
-                              ares::MethodInfo &methodInfo,
-                              ares::AttributeInfo &attributeInfo) override;
+    void visit_method_attribute(ClassInfo &classInfo, MethodInfo &methodInfo, AttributeInfo &attributeInfo) override;
 
 private:
     unsigned int m_Offset{}, m_Size{};

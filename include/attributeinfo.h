@@ -37,7 +37,7 @@ public:
     virtual ~AttributeInfo();
 
 public:
-    [[nodiscard]] unsigned int getSize() const;
+    [[nodiscard]] auto size() const -> unsigned int;
 
 public:
     uint16_t m_AttributeNameIndex{};

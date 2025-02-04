@@ -21,90 +21,70 @@ public:
     virtual ~ClassReader();
 
 public:
-    void visitClass(ares::ClassInfo &classInfo) override;
+    void visit_class(ClassInfo &classInfo) override;
 
-    [[nodiscard]] unsigned int getOffset() const;
+    [[nodiscard]] auto offset() const -> unsigned int;
 
 private:
-    void readClassAttributes(ClassInfo &classInfo);
+    void read_class_attributes(ClassInfo &classInfo);
 
-    void visitClassAttribute(ares::ClassInfo &classInfo,
-                             ares::AttributeInfo &attributeInfo) override;
+    void visit_class_attribute(ClassInfo &classInfo, AttributeInfo &attributeInfo) override;
 
-    void readMagicNumber(ares::ClassInfo &classInfo);
+    void read_magic_number(ClassInfo &classInfo);
 
-    void readClassVersion(ares::ClassInfo &classInfo);
+    void read_class_version(ClassInfo &classInfo);
 
-    void readConstantPool(ares::ClassInfo &classInfo);
+    void read_constant_pool(ClassInfo &classInfo);
 
-    void visitClassCPInfo(ares::ClassInfo &classInfo,
-                          ares::ConstantPoolInfo &info) override;
+    void visit_classpool_info(ClassInfo &classInfo, ConstantPoolInfo &info) override;
 
-    void readClassInfo(ares::ClassInfo &classInfo,
-                       ConstantInfo::ClassInfo &info);
+    void read_class_info(ClassInfo &classInfo, ConstantInfo::ClassInfo &info);
 
-    void readUTF8Info(ares::ClassInfo &classInfo,
-                      ConstantInfo::UTF8Info &info);
+    void read_utf8_info(ClassInfo &classInfo, ConstantInfo::UTF8Info &info);
 
-    void readFieldMethodInfo(ares::ClassInfo &classInfo,
-                             ConstantInfo::FieldMethodInfo &info);
+    void read_field_method_info(ClassInfo &classInfo, ConstantInfo::FieldMethodInfo &info);
 
-    void readNameAndType(ares::ClassInfo &classInfo,
-                         ConstantInfo::NameAndTypeInfo &info);
+    void read_name_and_type(ClassInfo &classInfo, ConstantInfo::NameAndTypeInfo &info);
 
-    void readStringInfo(ares::ClassInfo &classInfo,
-                        ConstantInfo::StringInfo &info);
+    void read_string_info(ClassInfo &classInfo, ConstantInfo::StringInfo &info);
 
-    void readDoubleLong(ares::ClassInfo &classInfo,
-                        ConstantInfo::DoubleLongInfo &info);
+    void read_double_long(ClassInfo &classInfo, ConstantInfo::DoubleLongInfo &info);
 
-    void readFloatInteger(ares::ClassInfo &classInfo,
-                          ConstantInfo::FloatIntegerInfo &info);
+    void read_float_integer(ClassInfo &classInfo, ConstantInfo::FloatIntegerInfo &info);
 
-    void readMethodType(ares::ClassInfo &classInfo,
-                        ConstantInfo::MethodTypeInfo &info);
+    void read_method_type(ClassInfo &classInfo, ConstantInfo::MethodTypeInfo &info);
 
-    void readMethodHandle(ares::ClassInfo &classInfo,
-                          ConstantInfo::MethodHandleInfo &info);
+    void read_method_handle(ClassInfo &classInfo, ConstantInfo::MethodHandleInfo &info);
 
-    void readDynamic(ares::ClassInfo &classInfo,
-                     ConstantInfo::DynamicInfo &info);
+    void read_dynamic(ClassInfo &classInfo, ConstantInfo::DynamicInfo &info);
 
-    void readModulePackage(ares::ClassInfo &classInfo,
-                           ConstantInfo::ModulePackageInfo &info);
+    void read_module_package(ClassInfo &classInfo, ConstantInfo::ModulePackageInfo &info);
 
-    void readAccessFlags(ClassInfo &classInfo);
+    void read_access_flags(ClassInfo &classInfo);
 
-    void readThisClass(ClassInfo &classInfo);
+    void read_this_class(ClassInfo &classInfo);
 
-    void readSuperClass(ClassInfo &classInfo);
+    void read_super_class(ClassInfo &classInfo);
 
-    void readInterfaces(ClassInfo &classInfo);
+    void read_interfaces(ClassInfo &classInfo);
 
-    void visitClassInterface(ClassInfo &classInfo,
-                             uint16_t interface) override;
+    void visit_class_interface(ClassInfo &classInfo, uint16_t interface) override;
 
-    void readFields(ClassInfo &classInfo);
+    void read_fields(ClassInfo &classInfo);
 
-    void visitClassField(ares::ClassInfo &classInfo,
-                         ares::FieldInfo &fieldInfo) override;
+    void visit_class_field(ClassInfo &classInfo, FieldInfo &fieldInfo) override;
 
-    void readFieldAttributes(ClassInfo &classInfo, FieldInfo &fieldInfo);
+    void read_field_attributes(ClassInfo &classInfo, FieldInfo &fieldInfo);
 
-    void visitFieldAttribute(ares::ClassInfo &classInfo,
-                             ares::FieldInfo &fieldInfo,
-                             ares::AttributeInfo &attributeInfo) override;
+    void visit_field_attribute(ClassInfo &classInfo, FieldInfo &fieldInfo, AttributeInfo &attributeInfo) override;
 
-    void readMethods(ClassInfo &classInfo);
+    void read_methods(ClassInfo &classInfo);
 
-    void visitClassMethod(ares::ClassInfo &classInfo,
-                          ares::MethodInfo &methodInfo) override;
+    void visit_class_method(ClassInfo &classInfo, MethodInfo &methodInfo) override;
 
-    void readMethodAttributes(ClassInfo &classInfo, MethodInfo &methodInfo);
+    void read_method_attributes(ClassInfo &classInfo, MethodInfo &methodInfo);
 
-    void visitMethodAttribute(ares::ClassInfo &classInfo,
-                              ares::MethodInfo &methodInfo,
-                              ares::AttributeInfo &attributeInfo) override;
+    void visit_method_attribute(ClassInfo &classInfo, MethodInfo &methodInfo, AttributeInfo &attributeInfo) override;
 
 private:
     unsigned int m_Offset{};

@@ -1,19 +1,35 @@
-#include "methodinfo.h"
+#include "classinfo.h"
 
 #include "attributeinfo.h"
+#include "constantinfo.h"
+#include "methodinfo.h"
+#include "fieldinfo.h"
 
-ares::MethodInfo::MethodInfo() = default;
+ares::ClassInfo::ClassInfo() = default;
 
-ares::MethodInfo::~MethodInfo() = default;
+ares::ClassInfo::~ClassInfo() = default;
 
-bool ares::MethodInfo::hasAccessFlag(ares::MethodInfo::AccessFlag accessFlags) const {
+auto ares::ClassInfo::is_valid_index(unsigned int index) const -> bool {
+    return index > 0 && index < m_ConstantPoolCount;
+}
+
+auto ares::ClassInfo::has_access_flags(AccessFlag accessFlags) const -> bool {
     return m_AccessFlags & accessFlags;
 }
 
-unsigned int ares::MethodInfo::getSize() const {
-    auto size = 8;
+auto ares::ClassInfo::size() const -> unsigned int {
+    size_t size = 24 + 2 * m_InterfacesCount;
+    for(const auto &constantPoolInfo : m_ConstantPool) {
+        if(!constantPoolInfo)
+            continue;
+        size += constantPoolInfo->size();
+    }
+    for(const auto &fieldInfo : m_Fields)
+        size += fieldInfo->size();
+    for(const auto &methodInfo : m_Methods)
+        size += methodInfo->size();
     for(const auto &attributeInfo : m_Attributes)
-        size += attributeInfo->getSize();
+        size += attributeInfo->size();
     return size;
 }
 

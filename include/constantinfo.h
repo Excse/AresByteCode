@@ -24,53 +24,53 @@ union ConstantInfo {
 
     struct ClassInfo {
         uint16_t m_NameIndex;
-    } classInfo;
+    } class_info;
 
     struct FieldMethodInfo {
         uint16_t m_ClassIndex;
         uint16_t m_NameAndTypeIndex;
-    } fieldMethodInfo;
+    } field_method_info;
 
     struct StringInfo {
         uint16_t m_StringIndex;
-    } stringInfo;
+    } string_info;
 
     struct FloatIntegerInfo {
         uint32_t m_Bytes;
-    } integerFloatInfo;
+    } integer_float_info;
 
     struct DoubleLongInfo {
         uint32_t m_HighBytes;
         uint32_t m_LowBytes;
-    } longDoubleInfo;
+    } long_double_info;
 
     struct NameAndTypeInfo {
         uint16_t m_NameIndex;
         uint16_t m_DescriptorIndex;
-    } nameAndTypeInfo;
+    } name_and_type_info;
 
     struct UTF8Info {
         uint16_t m_Length;
         uint8_t *m_Bytes;
-    } utf8Info;
+    } utf8_info;
 
     struct MethodHandleInfo {
         uint8_t m_ReferenceKind;
         uint16_t m_ReferenceIndex;
-    } methodHandleInfo;
+    } method_handle_info;
 
     struct MethodTypeInfo {
         uint16_t m_DescriptorIndex;
-    } methodTypeInfo;
+    } method_type_info;
 
     struct DynamicInfo {
         uint16_t m_BoostrapMethodAttrIndex;
         uint16_t m_NameAndTypeIndex;
-    } dynamicInfo;
+    } dynamic_info;
 
     struct ModulePackageInfo {
         uint16_t m_NameIndex;
-    } modulePackageInfo;
+    } module_package_info;
 };
 
 class ConstantPoolInfo {
@@ -102,7 +102,7 @@ public:
     virtual ~ConstantPoolInfo();
 
 public:
-    [[nodiscard]] unsigned int getSize() const;
+    [[nodiscard]] auto size() const -> unsigned int;
 
 public:
     ConstantInfo m_Info{};

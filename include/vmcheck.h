@@ -11,54 +11,37 @@ namespace ares {
 
 class VMCheck : Visitor {
 public:
-    void visitClass(ares::ClassInfo &classInfo) override;
+    void visit_class(ClassInfo &classInfo) override;
 
-    void visitClassCPInfo(ares::ClassInfo &classInfo,
-                          ares::ConstantPoolInfo &constantPoolInfo) override;
+    void visit_classpool_info(ClassInfo &classInfo, ConstantPoolInfo &constantPoolInfo) override;
 
-    void visitClassInterface(ares::ClassInfo &classInfo,
-                             uint16_t interface) override;
+    void visit_class_interface(ClassInfo &classInfo, uint16_t interface) override;
 
-    void visitClassField(ares::ClassInfo &classInfo,
-                         ares::FieldInfo &fieldInfo) override;
+    void visit_class_field(ClassInfo &classInfo, FieldInfo &fieldInfo) override;
 
-    void visitClassMethod(ares::ClassInfo &classInfo,
-                          ares::MethodInfo &methodInfo) override;
+    void visit_class_method(ClassInfo &classInfo, MethodInfo &methodInfo) override;
 
-    void visitClassAttribute(ares::ClassInfo &classInfo,
-                             ares::AttributeInfo &attributeInfo) override;
+    void visit_class_attribute(ClassInfo &classInfo, AttributeInfo &attributeInfo) override;
 
-    void visitFieldAttribute(ares::ClassInfo &classInfo,
-                             ares::FieldInfo &fieldInfo,
-                             ares::AttributeInfo &attributeInfo) override;
+    void visit_field_attribute(ClassInfo &classInfo, FieldInfo &fieldInfo, AttributeInfo &attributeInfo) override;
 
-    void visitMethodAttribute(ares::ClassInfo &classInfo,
-                              ares::MethodInfo &methodInfo,
-                              ares::AttributeInfo &attributeInfo) override;
+    void visit_method_attribute(ClassInfo &classInfo, MethodInfo &methodInfo, AttributeInfo &attributeInfo) override;
 
-    static void visitClassInfo(ares::ClassInfo &classInfo,
-                               ares::ConstantInfo::ClassInfo &info);
+    static void visit_class_info(ares::ClassInfo &classInfo, ares::ConstantInfo::ClassInfo &info);
 
-    static void visitFieldMethodInfo(ares::ClassInfo &classInfo,
-                                     ares::ConstantInfo::FieldMethodInfo &info);
+    static void visit_field_method_info(ares::ClassInfo &classInfo, ConstantInfo::FieldMethodInfo &info);
 
-    static void visitNameAndTypeInfo(ares::ClassInfo &classInfo,
-                                     ares::ConstantInfo::NameAndTypeInfo &info);
+    static void visit_name_and_type_info(ClassInfo &classInfo, ConstantInfo::NameAndTypeInfo &info);
 
-    static void visitStringInfo(ares::ClassInfo &classInfo,
-                                ares::ConstantInfo::StringInfo &info);
+    static void visit_string_info(ClassInfo &classInfo, ConstantInfo::StringInfo &info);
 
-    static void visitMethodTypeInfo(ares::ClassInfo &classInfo,
-                                    ares::ConstantInfo::MethodTypeInfo &info);
+    static void visit_method_type_info(ClassInfo &classInfo, ConstantInfo::MethodTypeInfo &info);
 
-    static void visitMethodHandleInfo(ares::ClassInfo &classInfo,
-                                      ares::ConstantInfo::MethodHandleInfo &info);
+    static void visit_method_handle_info(ClassInfo &classInfo, ConstantInfo::MethodHandleInfo &info);
 
-    static void visitDynamicInfo(ares::ClassInfo &classInfo,
-                                 ares::ConstantInfo::DynamicInfo &info);
+    static void visit_dynamic_info(ClassInfo &classInfo, ConstantInfo::DynamicInfo &info);
 
-    static void visitModulePackageInfo(ares::ClassInfo &classInfo,
-                                       ares::ConstantInfo::ModulePackageInfo &info);
+    static void visit_module_package_info(ClassInfo &classInfo, ConstantInfo::ModulePackageInfo &info);
 };
 
 } // namespace ares

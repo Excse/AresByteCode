@@ -16,47 +16,70 @@ public:
     virtual ~Manifest();
 
 public:
-    [[nodiscard]] std::string getContent();
+    [[nodiscard]] auto content() -> std::string;
 
 public:
     std::unordered_map <std::string, std::string> m_Data{};
 };
 
-class AresConfiguration {
+class Configuration {
 public:
-    AresConfiguration();
+    Configuration();
 
-    virtual ~AresConfiguration();
+    virtual ~Configuration();
 
 public:
     std::unordered_map <std::string, std::pair<uint8_t *, unsigned int>> m_Others{};
-    std::unordered_map <std::string, std::shared_ptr<ares::ClassInfo>> m_Classes{};
-    std::shared_ptr <ares::Manifest> m_Manifest{};
+    std::unordered_map <std::string, std::shared_ptr<ClassInfo>> m_Classes{};
+    std::shared_ptr <Manifest> m_Manifest{};
 };
 
-int readManifest(std::string &content, ares::Manifest &manifest);
+auto read_manifest(std::string &content, Manifest &manifest) -> int;
 
-int readJarFile(const std::string &path, ares::AresConfiguration &configuration);
+auto read_jar_file(const std::string &path, Configuration &configuration) -> int;
 
-int writeJarFile(const std::string &path, const ares::AresConfiguration &configuration);
+auto write_jar_file(const std::string &path, const Configuration &configuration) -> int;
 
-int readU32(uint32_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
+auto read_u32(uint32_t & data,
+              const uint8_t *byteCode,
+              unsigned int size,
+              unsigned int &offset) -> int;
 
-int writeU32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
+auto write_u32(uint32_t & data,
+               uint8_t * byteCode,
+               unsigned int size,
+               unsigned int &offset) -> int;
 
-int readU16(uint16_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
+auto read_u16(uint16_t & data,
+              const uint8_t *byteCode,
+              unsigned int size,
+              unsigned int &offset) -> int;
 
-int writeU16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
+auto write_u16(uint16_t & data,
+               uint8_t * byteCode,
+               unsigned int size,
+               unsigned int &offset) -> int;
 
-int readU8(uint8_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
+auto read_u8(uint8_t & data,
+             const uint8_t *byteCode,
+             unsigned int size,
+             unsigned int &offset) -> int;
 
-int writeU8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
+auto write_u8(uint8_t & data,
+              uint8_t * byteCode,
+              unsigned int size,
+              unsigned int &offset) -> int;
 
-int readU8Array(uint8_t *data, unsigned int length, uint8_t *byteCode, unsigned int size,
-                unsigned int &offset);
+auto read_u8_array(uint8_t * data,
+                   unsigned int length, uint8_t *byteCode,
+                   unsigned int size,
+                   unsigned int &offset) -> int;
 
-int writeU8Array(uint8_t *data, unsigned int dataSize, uint8_t *byteCode, unsigned int size,
-                 unsigned int &offset);
+auto write_u8_array(uint8_t * data,
+                    unsigned int dataSize,
+                    uint8_t *byteCode,
+                    unsigned int size,
+                    unsigned int &offset) -> int;
 
 } // namespace ares
 

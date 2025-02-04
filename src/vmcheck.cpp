@@ -1,10 +1,8 @@
-// TODO: Make the error messages better
-
-#include "../../include/vmcheck.h"
+#include "vmcheck.h"
 
 #include <iostream>
 
-void ares::VMCheck::visitClass(ares::ClassInfo &classInfo) {
+void ares::VMCheck::visit_class(ClassInfo &classInfo) {
     if (classInfo.m_MagicNumber != 0xCAFEBABE) {
         std::cerr << "The magic number doesn't match \"0xCAFEBABE\"." << std::endl;
         abort();
@@ -26,34 +24,34 @@ void ares::VMCheck::visitClass(ares::ClassInfo &classInfo) {
         if (constantPoolInfo == nullptr)
             continue;
 
-        VMCheck::visitClassCPInfo(classInfo, *constantPoolInfo);
+        VMCheck::visit_classpool_info(classInfo, *constantPoolInfo);
     }
 
-    if (classInfo.hasAccessFlag(ClassInfo::INTERFACE)) {
-        if (!classInfo.hasAccessFlag(ClassInfo::ABSTRACT)
-            || classInfo.hasAccessFlag(ClassInfo::FINAL)
-            || classInfo.hasAccessFlag(ClassInfo::SUPER)
-            || classInfo.hasAccessFlag(ClassInfo::ENUM)
-            || classInfo.hasAccessFlag(ClassInfo::MODULE)) {
+    if (classInfo.has_access_flags(ClassInfo::INTERFACE)) {
+        if (!classInfo.has_access_flags(ClassInfo::ABSTRACT)
+            || classInfo.has_access_flags(ClassInfo::FINAL)
+            || classInfo.has_access_flags(ClassInfo::SUPER)
+            || classInfo.has_access_flags(ClassInfo::ENUM)
+            || classInfo.has_access_flags(ClassInfo::MODULE)) {
             std::cerr << "The class file has invalid interface access flags." << std::endl;
             abort();
         }
-    } else if (classInfo.hasAccessFlag(ClassInfo::ANNOTATION)) {
-        if (!classInfo.hasAccessFlag(ClassInfo::INTERFACE)
-            || classInfo.hasAccessFlag(ClassInfo::ABSTRACT)
-            || classInfo.hasAccessFlag(ClassInfo::FINAL)) {
+    } else if (classInfo.has_access_flags(ClassInfo::ANNOTATION)) {
+        if (!classInfo.has_access_flags(ClassInfo::INTERFACE)
+            || classInfo.has_access_flags(ClassInfo::ABSTRACT)
+            || classInfo.has_access_flags(ClassInfo::FINAL)) {
             std::cerr << "The class file has invalid annotation access flags." << std::endl;
             abort();
         }
-    } else if (classInfo.hasAccessFlag(ClassInfo::MODULE)) {
-        if (classInfo.hasAccessFlag(ClassInfo::ABSTRACT)
-            || classInfo.hasAccessFlag(ClassInfo::FINAL)) {
+    } else if (classInfo.has_access_flags(ClassInfo::MODULE)) {
+        if (classInfo.has_access_flags(ClassInfo::ABSTRACT)
+            || classInfo.has_access_flags(ClassInfo::FINAL)) {
             std::cerr << "The class file has invalid module access flags." << std::endl;
             abort();
         }
     }
 
-    if (!classInfo.isIndexValid(classInfo.m_ThisClass)) {
+    if (!classInfo.is_valid_index(classInfo.m_ThisClass)) {
         std::cerr << "The \"this class\" index is not a valid constant pool index." << std::endl;
         abort();
     }
@@ -65,7 +63,7 @@ void ares::VMCheck::visitClass(ares::ClassInfo &classInfo) {
     }
 
     if (classInfo.m_SuperClass != 0) {
-        if (!classInfo.isIndexValid(classInfo.m_SuperClass)) {
+        if (!classInfo.is_valid_index(classInfo.m_SuperClass)) {
             std::cerr << "The \"super class\" index is not a valid constant pool index."
                       << std::endl;
             abort();
@@ -79,21 +77,21 @@ void ares::VMCheck::visitClass(ares::ClassInfo &classInfo) {
     }
 
     for (auto &interface : classInfo.m_Interfaces)
-        VMCheck::visitClassInterface(classInfo, interface);
+        VMCheck::visit_class_interface(classInfo, interface);
 
     for (auto &field : classInfo.m_Fields)
-        VMCheck::visitClassField(classInfo, *field);
+        VMCheck::visit_class_field(classInfo, *field);
 
     for (auto &method : classInfo.m_Methods)
-        VMCheck::visitClassMethod(classInfo, *method);
+        VMCheck::visit_class_method(classInfo, *method);
 
     for (auto &attribute : classInfo.m_Attributes)
-        VMCheck::visitClassAttribute(classInfo, *attribute);
+        VMCheck::visit_class_attribute(classInfo, *attribute);
 }
 
-void ares::VMCheck::visitClassInterface(ares::ClassInfo &classInfo,
-                                        uint16_t interface) {
-    if (!classInfo.isIndexValid(interface)) {
+void ares::VMCheck::visit_class_interface(ClassInfo &classInfo,
+                                          uint16_t interface) {
+    if (!classInfo.is_valid_index(interface)) {
         std::cerr << "The interface index is not a valid constant pool index." << std::endl;
         abort();
     }
@@ -105,39 +103,39 @@ void ares::VMCheck::visitClassInterface(ares::ClassInfo &classInfo,
     }
 }
 
-void ares::VMCheck::visitClassField(ares::ClassInfo &classInfo,
-                                    ares::FieldInfo &fieldInfo) {
-    if (fieldInfo.hasAccessFlag(FieldInfo::PUBLIC)) {
-        if (fieldInfo.hasAccessFlag(FieldInfo::PRIVATE)
-            || fieldInfo.hasAccessFlag(FieldInfo::PROTECTED)) {
+void ares::VMCheck::visit_class_field(ClassInfo &classInfo,
+                                      FieldInfo &fieldInfo) {
+    if (fieldInfo.has_access_flags(FieldInfo::PUBLIC)) {
+        if (fieldInfo.has_access_flags(FieldInfo::PRIVATE)
+            || fieldInfo.has_access_flags(FieldInfo::PROTECTED)) {
             std::cerr << "The field has invalid public access flags." << std::endl;
             abort();
         }
-    } else if (fieldInfo.hasAccessFlag(FieldInfo::PRIVATE)) {
-        if (fieldInfo.hasAccessFlag(FieldInfo::PUBLIC)
-            || fieldInfo.hasAccessFlag(FieldInfo::PROTECTED)) {
+    } else if (fieldInfo.has_access_flags(FieldInfo::PRIVATE)) {
+        if (fieldInfo.has_access_flags(FieldInfo::PUBLIC)
+            || fieldInfo.has_access_flags(FieldInfo::PROTECTED)) {
             std::cerr << "The field has invalid private access flags." << std::endl;
             abort();
         }
-    } else if (fieldInfo.hasAccessFlag(FieldInfo::PROTECTED)) {
-        if (fieldInfo.hasAccessFlag(FieldInfo::PUBLIC)
-            || fieldInfo.hasAccessFlag(FieldInfo::PRIVATE)) {
+    } else if (fieldInfo.has_access_flags(FieldInfo::PROTECTED)) {
+        if (fieldInfo.has_access_flags(FieldInfo::PUBLIC)
+            || fieldInfo.has_access_flags(FieldInfo::PRIVATE)) {
             std::cerr << "The field has invalid protected access flags." << std::endl;
             abort();
         }
     }
 
-    if (classInfo.hasAccessFlag(ClassInfo::INTERFACE)) {
-        if (!fieldInfo.hasAccessFlag(FieldInfo::PUBLIC)
-            || !fieldInfo.hasAccessFlag(FieldInfo::STATIC)
-            || !fieldInfo.hasAccessFlag(FieldInfo::FINAL)) {
+    if (classInfo.has_access_flags(ClassInfo::INTERFACE)) {
+        if (!fieldInfo.has_access_flags(FieldInfo::PUBLIC)
+            || !fieldInfo.has_access_flags(FieldInfo::STATIC)
+            || !fieldInfo.has_access_flags(FieldInfo::FINAL)) {
             std::cerr << "Fields of interfaces need to have public, static and final access "
                          "modifier set." << std::endl;
             abort();
         }
     }
 
-    if (!classInfo.isIndexValid(fieldInfo.m_NameIndex)) {
+    if (!classInfo.is_valid_index(fieldInfo.m_NameIndex)) {
         std::cerr << "The name index is not a valid constant pool index." << std::endl;
         abort();
     }
@@ -148,7 +146,7 @@ void ares::VMCheck::visitClassField(ares::ClassInfo &classInfo,
         abort();
     }
 
-    if (!classInfo.isIndexValid(fieldInfo.m_DescriptorIndex)) {
+    if (!classInfo.is_valid_index(fieldInfo.m_DescriptorIndex)) {
         std::cerr << "The descriptor index is not a valid constant pool index." << std::endl;
         abort();
     }
@@ -160,52 +158,52 @@ void ares::VMCheck::visitClassField(ares::ClassInfo &classInfo,
     }
 
     for (auto &attribute : fieldInfo.m_Attributes)
-        VMCheck::visitFieldAttribute(classInfo, fieldInfo, *attribute);
+        VMCheck::visit_field_attribute(classInfo, fieldInfo, *attribute);
 }
 
 // TODO: Do checks for the descriptor_index in
 //  https://docs.oracle.com/javase/specs/jvms/se15/html/jvms-4.html#jvms-4.6
-void ares::VMCheck::visitClassMethod(ares::ClassInfo &classInfo,
-                                     ares::MethodInfo &methodInfo) {
-    if (methodInfo.hasAccessFlag(MethodInfo::PUBLIC)) {
-        if (methodInfo.hasAccessFlag(MethodInfo::PRIVATE)
-            || methodInfo.hasAccessFlag(MethodInfo::PROTECTED)) {
+void ares::VMCheck::visit_class_method(ClassInfo &classInfo,
+                                       MethodInfo &methodInfo) {
+    if (methodInfo.has_access_flags(MethodInfo::PUBLIC)) {
+        if (methodInfo.has_access_flags(MethodInfo::PRIVATE)
+            || methodInfo.has_access_flags(MethodInfo::PROTECTED)) {
             std::cerr << "The method has invalid public access flags." << std::endl;
             abort();
         }
-    } else if (methodInfo.hasAccessFlag(MethodInfo::PRIVATE)) {
-        if (methodInfo.hasAccessFlag(MethodInfo::PUBLIC)
-            || methodInfo.hasAccessFlag(MethodInfo::PROTECTED)) {
+    } else if (methodInfo.has_access_flags(MethodInfo::PRIVATE)) {
+        if (methodInfo.has_access_flags(MethodInfo::PUBLIC)
+            || methodInfo.has_access_flags(MethodInfo::PROTECTED)) {
             std::cerr << "The method has invalid private access flags." << std::endl;
             abort();
         }
-    } else if (methodInfo.hasAccessFlag(MethodInfo::PROTECTED)) {
-        if (methodInfo.hasAccessFlag(MethodInfo::PUBLIC)
-            || methodInfo.hasAccessFlag(MethodInfo::PRIVATE)) {
+    } else if (methodInfo.has_access_flags(MethodInfo::PROTECTED)) {
+        if (methodInfo.has_access_flags(MethodInfo::PUBLIC)
+            || methodInfo.has_access_flags(MethodInfo::PRIVATE)) {
             std::cerr << "The method has invalid protected access flags." << std::endl;
             abort();
         }
     }
 
-    if (classInfo.hasAccessFlag(ClassInfo::INTERFACE)) {
-        if (methodInfo.hasAccessFlag(MethodInfo::PROTECTED)
-            || methodInfo.hasAccessFlag(MethodInfo::FINAL)
-            || methodInfo.hasAccessFlag(MethodInfo::SYNCHRONIZED)
-            || methodInfo.hasAccessFlag(MethodInfo::NATIVE)) {
+    if (classInfo.has_access_flags(ClassInfo::INTERFACE)) {
+        if (methodInfo.has_access_flags(MethodInfo::PROTECTED)
+            || methodInfo.has_access_flags(MethodInfo::FINAL)
+            || methodInfo.has_access_flags(MethodInfo::SYNCHRONIZED)
+            || methodInfo.has_access_flags(MethodInfo::NATIVE)) {
             std::cerr << "The access flags for an interface methods are invalid." << std::endl;
             abort();
         }
 
         if (classInfo.m_ClassVersion < ClassInfo::VERSION_8) {
-            if (!methodInfo.hasAccessFlag(MethodInfo::PUBLIC)
-                || !methodInfo.hasAccessFlag(MethodInfo::ABSTRACT)) {
+            if (!methodInfo.has_access_flags(MethodInfo::PUBLIC)
+                || !methodInfo.has_access_flags(MethodInfo::ABSTRACT)) {
                 std::cerr << "The access flags for an interface methods are invalid."
                           << std::endl;
                 abort();
             }
         } else if (classInfo.m_ClassVersion >= ClassInfo::VERSION_8) {
-            if (methodInfo.hasAccessFlag(MethodInfo::PUBLIC)
-                && methodInfo.hasAccessFlag(MethodInfo::PRIVATE)) {
+            if (methodInfo.has_access_flags(MethodInfo::PUBLIC)
+                && methodInfo.has_access_flags(MethodInfo::PRIVATE)) {
                 std::cerr << "The access flags for an interface methods are invalid."
                           << std::endl;
                 abort();
@@ -213,20 +211,20 @@ void ares::VMCheck::visitClassMethod(ares::ClassInfo &classInfo,
         }
     }
 
-    if (methodInfo.hasAccessFlag(MethodInfo::ABSTRACT)) {
-        if (methodInfo.hasAccessFlag(MethodInfo::PRIVATE)
-            || methodInfo.hasAccessFlag(MethodInfo::STATIC)
-            || methodInfo.hasAccessFlag(MethodInfo::FINAL)
-            || methodInfo.hasAccessFlag(MethodInfo::SYNCHRONIZED)
-            || methodInfo.hasAccessFlag(MethodInfo::NATIVE)
-            || methodInfo.hasAccessFlag(MethodInfo::STRICT)) {
+    if (methodInfo.has_access_flags(MethodInfo::ABSTRACT)) {
+        if (methodInfo.has_access_flags(MethodInfo::PRIVATE)
+            || methodInfo.has_access_flags(MethodInfo::STATIC)
+            || methodInfo.has_access_flags(MethodInfo::FINAL)
+            || methodInfo.has_access_flags(MethodInfo::SYNCHRONIZED)
+            || methodInfo.has_access_flags(MethodInfo::NATIVE)
+            || methodInfo.has_access_flags(MethodInfo::STRICT)) {
             std::cerr << "The access flags for an interface methods are invalid."
                       << std::endl;
             abort();
         }
     }
 
-    if (!classInfo.isIndexValid(methodInfo.m_NameIndex)) {
+    if (!classInfo.is_valid_index(methodInfo.m_NameIndex)) {
         std::cerr << "The name index is not a valid constant pool index." << std::endl;
         abort();
     }
@@ -238,21 +236,21 @@ void ares::VMCheck::visitClassMethod(ares::ClassInfo &classInfo,
     }
 
     std::string name;
-    name.assign((char *) methodName->m_Info.utf8Info.m_Bytes, methodName->m_Info.utf8Info.m_Length);
+    name.assign((char *) methodName->m_Info.utf8_info.m_Bytes, methodName->m_Info.utf8_info.m_Length);
     if (name == "<init>") {
-        if (methodInfo.hasAccessFlag(MethodInfo::ABSTRACT)
-            || methodInfo.hasAccessFlag(MethodInfo::NATIVE)
-            || methodInfo.hasAccessFlag(MethodInfo::BRIDGE)
-            || methodInfo.hasAccessFlag(MethodInfo::SYNCHRONIZED)
-            || methodInfo.hasAccessFlag(MethodInfo::FINAL)
-            || methodInfo.hasAccessFlag(MethodInfo::STATIC)) {
+        if (methodInfo.has_access_flags(MethodInfo::ABSTRACT)
+            || methodInfo.has_access_flags(MethodInfo::NATIVE)
+            || methodInfo.has_access_flags(MethodInfo::BRIDGE)
+            || methodInfo.has_access_flags(MethodInfo::SYNCHRONIZED)
+            || methodInfo.has_access_flags(MethodInfo::FINAL)
+            || methodInfo.has_access_flags(MethodInfo::STATIC)) {
             std::cerr << "The access flags for an interface methods are invalid."
                       << std::endl;
             abort();
         }
     }
 
-    if (!classInfo.isIndexValid(methodInfo.m_DescriptorIndex)) {
+    if (!classInfo.is_valid_index(methodInfo.m_DescriptorIndex)) {
         std::cerr << "The descriptor index is not a valid constant pool index." << std::endl;
         abort();
     }
@@ -264,12 +262,12 @@ void ares::VMCheck::visitClassMethod(ares::ClassInfo &classInfo,
     }
 
     for (auto &attribute : methodInfo.m_Attributes)
-        VMCheck::visitMethodAttribute(classInfo, methodInfo, *attribute);
+        VMCheck::visit_method_attribute(classInfo, methodInfo, *attribute);
 }
 
-void ares::VMCheck::visitClassAttribute(ares::ClassInfo &classInfo,
-                                        ares::AttributeInfo &attributeInfo) {
-    if (!classInfo.isIndexValid(attributeInfo.m_AttributeNameIndex)) {
+void ares::VMCheck::visit_class_attribute(ClassInfo &classInfo,
+                                          AttributeInfo &attributeInfo) {
+    if (!classInfo.is_valid_index(attributeInfo.m_AttributeNameIndex)) {
         std::cerr << "The name index is not a valid constant pool index." << std::endl;
         abort();
     }
@@ -281,48 +279,46 @@ void ares::VMCheck::visitClassAttribute(ares::ClassInfo &classInfo,
     }
 }
 
-void ares::VMCheck::visitFieldAttribute(ares::ClassInfo &classInfo,
-                                        ares::FieldInfo &,
-                                        ares::AttributeInfo &attributeInfo) {
-    VMCheck::visitClassAttribute(classInfo, attributeInfo);
+void ares::VMCheck::visit_field_attribute(ClassInfo &classInfo,
+                                          FieldInfo &,
+                                          AttributeInfo &attributeInfo) {
+    VMCheck::visit_class_attribute(classInfo, attributeInfo);
 }
 
-void ares::VMCheck::visitMethodAttribute(ares::ClassInfo &classInfo,
-                                         ares::MethodInfo &,
-                                         ares::AttributeInfo &attributeInfo) {
-    VMCheck::visitClassAttribute(classInfo, attributeInfo);
+void ares::VMCheck::visit_method_attribute(ClassInfo &classInfo,
+                                           MethodInfo &,
+                                           AttributeInfo &attributeInfo) {
+    VMCheck::visit_class_attribute(classInfo, attributeInfo);
 }
 
-void ares::VMCheck::visitClassCPInfo(ares::ClassInfo &classInfo,
-                                     ares::ConstantPoolInfo &constantPoolInfo) {
+void ares::VMCheck::visit_classpool_info(ClassInfo &classInfo,
+                                         ConstantPoolInfo &constantPoolInfo) {
     switch (constantPoolInfo.m_Tag) {
-        case ConstantPoolInfo::CLASS:
-            VMCheck::visitClassInfo(classInfo, constantPoolInfo.m_Info.classInfo);
+        case ConstantPoolInfo::CLASS:VMCheck::visit_class_info(classInfo, constantPoolInfo.m_Info.class_info);
             break;
         case ConstantPoolInfo::FIELD_REF:
         case ConstantPoolInfo::METHOD_REF:
         case ConstantPoolInfo::INTERFACE_METHOD_REF:
-            VMCheck::visitFieldMethodInfo(classInfo, constantPoolInfo.m_Info.fieldMethodInfo);
+            VMCheck::visit_field_method_info(classInfo, constantPoolInfo.m_Info.field_method_info);
             break;
         case ConstantPoolInfo::NAME_AND_TYPE:
-            VMCheck::visitNameAndTypeInfo(classInfo, constantPoolInfo.m_Info.nameAndTypeInfo);
+            VMCheck::visit_name_and_type_info(classInfo, constantPoolInfo.m_Info.name_and_type_info);
             break;
-        case ConstantPoolInfo::STRING:
-            VMCheck::visitStringInfo(classInfo, constantPoolInfo.m_Info.stringInfo);
+        case ConstantPoolInfo::STRING:VMCheck::visit_string_info(classInfo, constantPoolInfo.m_Info.string_info);
             break;
         case ConstantPoolInfo::METHOD_TYPE:
-            VMCheck::visitMethodTypeInfo(classInfo, constantPoolInfo.m_Info.methodTypeInfo);
+            VMCheck::visit_method_type_info(classInfo, constantPoolInfo.m_Info.method_type_info);
             break;
         case ConstantPoolInfo::METHOD_HANDLE:
-            VMCheck::visitMethodHandleInfo(classInfo, constantPoolInfo.m_Info.methodHandleInfo);
+            VMCheck::visit_method_handle_info(classInfo, constantPoolInfo.m_Info.method_handle_info);
             break;
         case ConstantPoolInfo::DYNAMIC:
         case ConstantPoolInfo::INVOKE_DYNAMIC:
-            VMCheck::visitDynamicInfo(classInfo, constantPoolInfo.m_Info.dynamicInfo);
+            VMCheck::visit_dynamic_info(classInfo, constantPoolInfo.m_Info.dynamic_info);
             break;
         case ConstantPoolInfo::MODULE:
         case ConstantPoolInfo::PACKAGE:
-            VMCheck::visitModulePackageInfo(classInfo, constantPoolInfo.m_Info.modulePackageInfo);
+            VMCheck::visit_module_package_info(classInfo, constantPoolInfo.m_Info.module_package_info);
             break;
         case ConstantPoolInfo::UTF_8:
         case ConstantPoolInfo::INTEGER:
@@ -337,64 +333,64 @@ void ares::VMCheck::visitClassCPInfo(ares::ClassInfo &classInfo,
     }
 }
 
-void ares::VMCheck::visitClassInfo(ares::ClassInfo &classInfo,
-                                   ares::ConstantInfo::ClassInfo &info) {
-    if (!classInfo.isIndexValid(info.m_NameIndex)) {
+void ares::VMCheck::visit_class_info(ares::ClassInfo &classInfo,
+                                     ares::ConstantInfo::ClassInfo &info) {
+    if (!classInfo.is_valid_index(info.m_NameIndex)) {
         std::cout << "The name index is not a valid constant pool index." << std::endl;
         abort();
     }
 }
 
-void ares::VMCheck::visitFieldMethodInfo(ares::ClassInfo &classInfo,
-                                         ares::ConstantInfo::FieldMethodInfo &info) {
-    if (!classInfo.isIndexValid(info.m_ClassIndex)) {
+void ares::VMCheck::visit_field_method_info(ares::ClassInfo &classInfo,
+                                            ares::ConstantInfo::FieldMethodInfo &info) {
+    if (!classInfo.is_valid_index(info.m_ClassIndex)) {
         std::cerr << "The class index is not a valid constant pool index." << std::endl;
         abort();
     }
 
-    if (!classInfo.isIndexValid(info.m_NameAndTypeIndex)) {
+    if (!classInfo.is_valid_index(info.m_NameAndTypeIndex)) {
         std::cerr << "The name and type index is not a valid constant pool index." << std::endl;
         abort();
     }
 }
 
-void ares::VMCheck::visitNameAndTypeInfo(ares::ClassInfo &classInfo,
-                                         ares::ConstantInfo::NameAndTypeInfo &info) {
-    if (!classInfo.isIndexValid(info.m_NameIndex)) {
+void ares::VMCheck::visit_name_and_type_info(ClassInfo &classInfo,
+                                             ConstantInfo::NameAndTypeInfo &info) {
+    if (!classInfo.is_valid_index(info.m_NameIndex)) {
         std::cerr << "The name index is not a valid constant pool index." << std::endl;
         abort();
     }
 
-    if (!classInfo.isIndexValid(info.m_DescriptorIndex)) {
+    if (!classInfo.is_valid_index(info.m_DescriptorIndex)) {
         std::cerr << "The descriptor index is not a valid constant pool index." << std::endl;
         abort();
     }
 }
 
-void ares::VMCheck::visitStringInfo(ares::ClassInfo &classInfo,
-                                    ares::ConstantInfo::StringInfo &info) {
-    if (!classInfo.isIndexValid(info.m_StringIndex)) {
+void ares::VMCheck::visit_string_info(ClassInfo &classInfo,
+                                      ConstantInfo::StringInfo &info) {
+    if (!classInfo.is_valid_index(info.m_StringIndex)) {
         std::cerr << "The string index is not a valid constant pool index." << std::endl;
         abort();
     }
 }
 
-void ares::VMCheck::visitMethodTypeInfo(ares::ClassInfo &classInfo,
-                                        ares::ConstantInfo::MethodTypeInfo &info) {
-    if (!classInfo.isIndexValid(info.m_DescriptorIndex)) {
+void ares::VMCheck::visit_method_type_info(ClassInfo &classInfo,
+                                           ConstantInfo::MethodTypeInfo &info) {
+    if (!classInfo.is_valid_index(info.m_DescriptorIndex)) {
         std::cerr << "The descriptor index is not a valid constant pool index" << std::endl;
         abort();
     }
 }
 
-void ares::VMCheck::visitMethodHandleInfo(ares::ClassInfo &classInfo,
-                                          ares::ConstantInfo::MethodHandleInfo &info) {
+void ares::VMCheck::visit_method_handle_info(ClassInfo &classInfo,
+                                             ConstantInfo::MethodHandleInfo &info) {
     if (info.m_ReferenceKind < 1 || info.m_ReferenceKind > 9) {
         std::cerr << "The reference kind is not in range of 0 to 9." << std::endl;
         abort();
     }
 
-    if (!classInfo.isIndexValid(info.m_ReferenceIndex)) {
+    if (!classInfo.is_valid_index(info.m_ReferenceIndex)) {
         std::cerr << "The reference index is not a valid constant pool index." << std::endl;
         abort();
     }
@@ -445,12 +441,12 @@ void ares::VMCheck::visitMethodHandleInfo(ares::ClassInfo &classInfo,
         || referenceKind == ConstantInfo::MethodHandleKind::InvokeInterface
         || referenceKind == ConstantInfo::MethodHandleKind::NewInvokeSpecial) {
         auto nameAndType = classInfo.m_ConstantPool[
-                constantPoolInfo->m_Info.fieldMethodInfo.m_NameAndTypeIndex - 1];
+            constantPoolInfo->m_Info.field_method_info.m_NameAndTypeIndex - 1];
         auto nameUTF8 = classInfo.m_ConstantPool[
-                nameAndType->m_Info.nameAndTypeInfo.m_NameIndex - 1];
+            nameAndType->m_Info.name_and_type_info.m_NameIndex - 1];
 
         std::string name;
-        name.assign((char *) nameUTF8->m_Info.utf8Info.m_Bytes, nameUTF8->m_Info.utf8Info.m_Length);
+        name.assign((char *) nameUTF8->m_Info.utf8_info.m_Bytes, nameUTF8->m_Info.utf8_info.m_Length);
 
         if (referenceKind == ConstantInfo::MethodHandleKind::NewInvokeSpecial) {
             if (name != "<init>") {
@@ -468,17 +464,17 @@ void ares::VMCheck::visitMethodHandleInfo(ares::ClassInfo &classInfo,
 }
 
 // TODO: Check if the bootstrap method index if correct.
-void ares::VMCheck::visitDynamicInfo(ares::ClassInfo &classInfo,
-                                     ares::ConstantInfo::DynamicInfo &info) {
-    if (!classInfo.isIndexValid(info.m_NameAndTypeIndex)) {
+void ares::VMCheck::visit_dynamic_info(ClassInfo &classInfo,
+                                       ConstantInfo::DynamicInfo &info) {
+    if (!classInfo.is_valid_index(info.m_NameAndTypeIndex)) {
         std::cerr << "The name and type index is not a valid constant pool index." << std::endl;
         abort();
     }
 }
 
-void ares::VMCheck::visitModulePackageInfo(ares::ClassInfo &classInfo,
-                                           ares::ConstantInfo::ModulePackageInfo &info) {
-    if (!classInfo.isIndexValid(info.m_NameIndex)) {
+void ares::VMCheck::visit_module_package_info(ClassInfo &classInfo,
+                                              ConstantInfo::ModulePackageInfo &info) {
+    if (!classInfo.is_valid_index(info.m_NameIndex)) {
         std::cerr << "The name index is not a valid constant pool index." << std::endl;
         abort();
     }
