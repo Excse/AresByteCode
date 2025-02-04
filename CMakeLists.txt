@@ -40,6 +40,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(libzip)
 
 # =====================
+# Boost
+# =====================
+
+# You need to have boost installed. E.g. via sudo apt-get install libboost-all-dev
+find_package(Boost REQUIRED)
+
+# =====================
 # Library
 # =====================
 
@@ -56,7 +63,7 @@ add_library(${PROJECT_NAME}_lib
         src/vm_check.cpp
         src/class_writer.cpp)
 
-target_link_libraries(${PROJECT_NAME}_lib zip)
+target_link_libraries(${PROJECT_NAME}_lib PRIVATE zip Boost::boost)
 
 # =====================
 # Tests
@@ -67,5 +74,7 @@ enable_testing()
 add_executable(${PROJECT_NAME}_tests
         tests/main.cpp)
 
-target_link_libraries(${PROJECT_NAME}_tests gtest gtest_main ${PROJECT_NAME}_lib zip)
+target_link_libraries(${PROJECT_NAME}_tests gtest gtest_main ${PROJECT_NAME}_lib)
+target_compile_definitions(${PROJECT_NAME}_tests PRIVATE TEST_PATH="${CMAKE_SOURCE_DIR}/tests")
+
 add_test(NAME test_${PROJECT_NAME} COMMAND test_${PROJECT_NAME})

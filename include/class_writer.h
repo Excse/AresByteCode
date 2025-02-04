@@ -11,7 +11,7 @@ public:
 public:
     void visit_class(ClassInfo &class_info) override;
 
-    [[nodiscard]] auto byte_code() const -> uint8_t *;
+    [[nodiscard]] auto byte_code() const -> const std::vector<uint8_t > &;
 
 private:
     void visit_classpool_info(ClassInfo &class_info, ConstantPoolInfo &info) override;
@@ -30,7 +30,7 @@ private:
 
 private:
     unsigned int _offset{}, _size{};
-    uint8_t *_byte_code{};
+    std::vector<uint8_t> _byte_code{};
 };
 
 } // namespace ares

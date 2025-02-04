@@ -4,14 +4,18 @@
 
 #include "gtest/gtest.h"
 
-#include "../include/vm_check.h"
-#include "../include/utils.h"
+#include "vm_check.h"
+#include "utils.h"
+
+static const std::string TEST_FILE_OUTPUT = TEST_PATH "/resources/hello_world_out.jar";
+static const std::string TEST_FILE_INPUT = TEST_PATH "/resources/hello_world_in.jar";
 
 TEST(General, Works) {
     auto start = std::chrono::high_resolution_clock::now();
 
     ares::Configuration configuration{};
-    if (ares::read_jar_file("/home/timo/Desktop/Banana.jar", configuration) == EXIT_FAILURE) {
+    if (ares::read_jar_file(TEST_FILE_INPUT, configuration) == EXIT_FAILURE) {
+        std::cerr << "Failed to read the file" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -19,7 +23,8 @@ TEST(General, Works) {
     for (const auto &classInfo : configuration.classes)
         vmCheck.visit_class(*classInfo.second);
 
-    if (ares::write_jar_file("/home/timo/Desktop/Banana_OBF.jar", configuration) == EXIT_FAILURE) {
+    if (ares::write_jar_file(TEST_FILE_OUTPUT, configuration) == EXIT_FAILURE) {
+        std::cerr << "Failed to write the file" << std::endl;
         exit(EXIT_FAILURE);
     }
 

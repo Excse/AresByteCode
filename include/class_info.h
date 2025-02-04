@@ -58,8 +58,7 @@ public:
     [[nodiscard]] auto size() const -> unsigned int;
 
 public:
-    uint8_t *byte_code{};
-    unsigned int info_size{};
+    std::vector<uint8_t> byte_code{};
 
     uint32_t magic_number{};
     uint16_t minor_version{};

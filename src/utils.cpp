@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 
+#include <boost/algorithm/string.hpp>
 #include <zip.h>
 
 #include "class_reader.h"
@@ -11,84 +12,108 @@
 
 auto ares::Manifest::content() -> std::string {
     std::stringstream content;
-    for (const auto &line : data)
+    for (const auto &line: data) {
         content << line.first << ": " << line.second << std::endl;
+    }
     return content.str();
 }
 
 auto ares::read_manifest(std::string &content, Manifest &manifest) -> int {
-    std::size_t current = content.find('\n'), previous = 0;
-    while (current != std::string::npos) {
-        auto line = content.substr(previous, current - previous);
-        previous = current + 1;
-        current = content.find('\n', previous);
+    std::istringstream stream(content);
+    std::string line;
 
-        line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
-        if (line[0] == '#' || line.empty())
-            continue;
+    while (std::getline(stream, line)) {
+        boost::algorithm::trim(line);
 
-        auto delimiterPos = line.find(':');
-        auto key = line.substr(0, delimiterPos);
-        auto value = line.substr(delimiterPos + 1);
+        // Ignore comments and empty lines
+        if (line.empty() || line[0] == '#') continue;
 
-        manifest.data.emplace(key, value);
+        std::vector<std::string> tokens;
+        boost::split(tokens, line, boost::is_any_of(":"), boost::token_compress_on);
+
+        // Skip malformed lines without a key-value pair
+        if (tokens.size() < 2) continue;
+
+        auto key = tokens[0];
+        boost::algorithm::trim(key);
+
+        if (key.empty()) continue;
+
+        auto value = tokens[1];
+        boost::algorithm::trim(value);
+
+        manifest.data.emplace(std::move(key), std::move(value));
     }
 
     return EXIT_SUCCESS;
 }
 
 auto ares::read_jar_file(const std::string &path, Configuration &configuration) -> int {
-    auto correctSuffix = path.find(".jar", path.size() - 4) != std::string::npos;
-    if (!correctSuffix) {
+    if (!boost::algorithm::iends_with(path, ".jar")) {
         std::cerr << "You can only enter \".jar\" files." << std::endl;
         return EXIT_FAILURE;
     }
 
-    auto error = 0;
-    auto zip = zip_open("/home/timo/Desktop/Banana.jar", 0, &error);
+    int error = 0;
+    zip_t *zip = zip_open(path.c_str(), 0, &error);
+
     if (!zip) {
-        zip_error_t zipError;
-        zip_error_init_with_code(&zipError, error);
-        std::cerr << zip_error_strerror(&zipError) << std::endl;
+        zip_error_t zip_error;
+        zip_error_init_with_code(&zip_error, error);
+        std::cerr << zip_error_strerror(&zip_error) << std::endl;
+        zip_error_fini(&zip_error);
         return EXIT_FAILURE;
     }
 
-    auto entries = zip_get_num_entries(zip, 0);
-    for (auto index = 0; index < entries; index++) {
-        auto name = std::string(zip_get_name(zip, index, 0));
+    zip_int64_t entries = zip_get_num_entries(zip, 0);
+    for (zip_int64_t index = 0; index < entries; index++) {
+        const char *file_name = zip_get_name(zip, index, 0);
+        if (!file_name) continue;
 
-        struct zip_stat stat{};
+        std::string name(file_name);
+
+        zip_stat_t stat;
         zip_stat_init(&stat);
-        zip_stat(zip, name.c_str(), 0, &stat);
+        if (zip_stat(zip, name.c_str(), 0, &stat) != 0) {
+            std::cerr << "Warning: Failed to retrieve ZIP entry info for: " << name << "\n";
+            continue;
+        }
 
-        auto arrayContents = new uint8_t[stat.size];
-        auto file = zip_fopen(zip, name.c_str(), 0);
-        zip_fread(file, arrayContents, stat.size);
+        auto data = std::vector<uint8_t>(stat.size);
+        zip_file_t *file = zip_fopen(zip, name.c_str(), 0);
+        if (!file) {
+            std::cerr << "Warning: Failed to open file in ZIP: " << name << "\n";
+            continue;
+        }
+
+        if (zip_fread(file, data.data(), stat.size) < 0) {
+            std::cerr << "Warning: Failed to read file from ZIP: " << name << "\n";
+            zip_fclose(file);
+            continue;
+        }
+
         zip_fclose(file);
 
         if (name == "META-INF/MANIFEST.MF") {
             auto manifest = std::make_shared<Manifest>();
-            auto content = std::string((char *) arrayContents);
+            auto content = std::string(reinterpret_cast<char *>(data.data()), stat.size);
             ares::read_manifest(content, *manifest);
             configuration.manifest = manifest;
-        } else if (name.find(".class", name.size() - 6) != std::string::npos) {
+        } else if (boost::algorithm::iends_with(name, ".class")) {
             auto classInfo = std::make_shared<ClassInfo>();
-            classInfo->byte_code = arrayContents;
-            classInfo->info_size = stat.size;
+            classInfo->byte_code = std::move(data);
 
             configuration.classes.emplace(name, classInfo);
 
             ClassReader classReader;
             classReader.visit_class(*classInfo);
 
-            if (classReader.offset() != classInfo->info_size) {
-                std::cerr << "The offset after reading the class doesn't match the class size"
-                          << std::endl;
+            if (classReader.offset() != stat.size) {
+                std::cerr << "The offset after reading the class doesn't match the class size" << std::endl;
                 return EXIT_FAILURE;
             }
         } else {
-            configuration.others.emplace(name, std::pair<uint8_t *, unsigned int>(
-                    arrayContents, stat.size));
+            configuration.others.emplace(name, std::move(data));
         }
     }
 
@@ -98,8 +123,7 @@ auto ares::read_jar_file(const std::string &path, Configuration &configuration) 
 }
 
 auto ares::write_jar_file(const std::string &path, const Configuration &configuration) -> int {
-    auto correctSuffix = path.find(".jar", path.size() - 4) != std::string::npos;
-    if (!correctSuffix) {
+    if (!boost::algorithm::iends_with(path, ".jar")) {
         std::cerr << "You can only enter \".jar\" files." << std::endl;
         return EXIT_FAILURE;
     }
@@ -144,7 +168,7 @@ auto ares::write_jar_file(const std::string &path, const Configuration &configur
     }
 
     for (const auto &other : configuration.others) {
-        auto source = zip_source_buffer(zip, other.second.first, other.second.second, 0);
+        auto source = zip_source_buffer(zip, other.second.data(), other.second.size(), 0);
         if (source == nullptr) {
             std::cerr << zip_strerror(zip) << std::endl;
             return EXIT_FAILURE;
@@ -178,103 +202,107 @@ auto ares::write_jar_file(const std::string &path, const Configuration &configur
     return EXIT_SUCCESS;
 }
 
-auto ares::read_u32(uint32_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
-    if (offset + 4 > size) {
+auto ares::read_u32(uint32_t &data, const std::vector<uint8_t> &byte_code, unsigned int &offset) -> bool {
+    if (offset + 4 > byte_code.size()) {
         std::cerr << "Couldn't read u32 because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
+        return false;
     }
 
-    data = be32toh(*(uint32_t *) (byteCode + offset));
+    data = be32toh(*((uint32_t *) &byte_code[offset]));
     offset += 4;
 
-    return EXIT_SUCCESS;
+    return true;
 }
 
-auto ares::write_u32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
-    if (offset + 4 > size) {
+auto ares::write_u32(uint32_t &data, std::vector<uint8_t> &byte_code, unsigned int &offset) -> bool {
+    if (offset + 4 > byte_code.size()) {
         std::cerr << "Couldn't read u32 because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
+        return false;
     }
 
-    byteCode[offset++] = (data >> 24) & 0xFF;
-    byteCode[offset++] = (data >> 16) & 0xFF;
-    byteCode[offset++] = (data >> 8) & 0xFF;
-    byteCode[offset++] = data & 0xFF;
+    byte_code[offset++] = (data >> 24) & 0xFF;
+    byte_code[offset++] = (data >> 16) & 0xFF;
+    byte_code[offset++] = (data >> 8) & 0xFF;
+    byte_code[offset++] = data & 0xFF;
 
-    return EXIT_SUCCESS;
+    return true;
 }
 
-auto ares::read_u16(uint16_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
-    if (offset + 2 > size) {
+auto ares::read_u16(uint16_t &data, const std::vector<uint8_t> &byte_code, unsigned int &offset) -> bool {
+    if (offset + 2 > byte_code.size()) {
         std::cerr << "Couldn't read u16 because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
+        return false;
     }
 
-    data = be16toh(*(uint16_t *) (byteCode + offset));
+    data = be16toh(*((uint16_t *) &byte_code[offset]));
     offset += 2;
 
-    return EXIT_SUCCESS;
+    return true;
 }
 
-auto ares::write_u16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
-    if (offset + 2 > size) {
+auto ares::write_u16(uint16_t &data, std::vector<uint8_t> &byte_code, unsigned int &offset) -> bool {
+    if (offset + 2 > byte_code.size()) {
         std::cerr << "Couldn't write u16 because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
+        return false;
     }
 
-    byteCode[offset++] = (data >> 8) & 0xFF;
-    byteCode[offset++] = data & 0xFF;
+    byte_code[offset++] = (data >> 8) & 0xFF;
+    byte_code[offset++] = data & 0xFF;
 
-    return EXIT_SUCCESS;
+    return true;
 }
 
-auto ares::read_u8(uint8_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
-    if (offset + 1 > size) {
+auto ares::read_u8(uint8_t &data, const std::vector<uint8_t> &byte_code, unsigned int &offset) -> bool {
+    if (offset + 1 > byte_code.size()) {
         std::cerr << "Couldn't read u8 because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
+        return false;
     }
 
-    data = *(uint8_t *) (byteCode + offset);
+    data = *((uint8_t *) &byte_code[offset]);
     offset += 1;
 
-    return EXIT_SUCCESS;
+    return true;
 }
 
-auto ares::write_u8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset) -> int {
-    if (offset + 1 > size) {
+auto ares::write_u8(uint8_t &data, std::vector<uint8_t> &byte_code, unsigned int &offset) -> bool {
+    if (offset + 1 > byte_code.size()) {
         std::cerr << "Couldn't write u8 because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
+        return false;
     }
 
-    byteCode[offset++] = data & 0xFF;
+    byte_code[offset++] = data & 0xFF;
 
-    return EXIT_SUCCESS;
+    return true;
 }
 
-auto ares::read_u8_array(uint8_t *data, unsigned int length, uint8_t *byteCode, unsigned int size,
-                         unsigned int &offset) -> int {
-    if (offset + (length * 1) > size) {
+auto ares::read_u8_array(uint8_t *data,
+                         unsigned int length,
+                         const std::vector<uint8_t> &byteCode,
+                         unsigned int &offset) -> bool {
+    if ((offset + length) > byteCode.size()) {
         std::cerr << "Couldn't read the u8 array because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
+        return false;
     }
 
     for (size_t index = 0; index < length; index++)
-        read_u8(data[index], byteCode, size, offset);
+        read_u8(data[index], byteCode, offset);
 
-    return EXIT_SUCCESS;
+    return true;
 }
 
-auto ares::write_u8_array(uint8_t *data, unsigned int dataSize, uint8_t *byteCode, unsigned int size,
-                          unsigned int &offset) -> int {
-    if (offset + (dataSize * 1) > size) {
+auto ares::write_u8_array(uint8_t *data,
+                          unsigned int data_size,
+                          std::vector<uint8_t> &byte_code,
+                          unsigned int &offset) -> bool {
+    if ((offset + data_size) > byte_code.size()) {
         std::cerr << "Couldn't write the u8 array because it is out of bounds." << std::endl;
-        return EXIT_FAILURE;
+        return false;
     }
 
-    for (size_t index = 0; index < dataSize; index++)
-        write_u8(data[index], byteCode, size, offset);
+    for (size_t index = 0; index < data_size; index++)
+        write_u8(data[index], byte_code, offset);
 
-    return EXIT_SUCCESS;
+    return true;
 }
 
 //==============================================================================
