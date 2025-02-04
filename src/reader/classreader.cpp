@@ -1,8 +1,8 @@
-#include "../../include/classreader.h"
+#include "classreader.h"
 
 #include <iostream>
 
-#include "../../include/utils.h"
+#include "utils.h"
 
 ares::ClassReader::ClassReader(unsigned int offset)
         : m_Offset(offset) {}
@@ -350,8 +350,7 @@ void ares::ClassReader::readInterfaces(ClassInfo &classInfo) {
     }
 }
 
-void ares::ClassReader::visitClassInterface(ares::ClassInfo &classInfo,
-                                            uint16_t interface) {}
+void ares::ClassReader::visitClassInterface(ares::ClassInfo &, uint16_t) {}
 
 void ares::ClassReader::readFields(ClassInfo &classInfo) {
     if (ares::readU16(classInfo.m_FieldsCount, classInfo.m_ByteCode,
@@ -411,7 +410,7 @@ void ares::ClassReader::readFieldAttributes(ares::ClassInfo &classInfo,
 }
 
 void ares::ClassReader::visitFieldAttribute(ares::ClassInfo &classInfo,
-                                            ares::FieldInfo &fieldInfo,
+                                            ares::FieldInfo &,
                                             ares::AttributeInfo &attributeInfo) {
     ClassReader::visitClassAttribute(classInfo, attributeInfo);
 }
@@ -474,7 +473,7 @@ void ares::ClassReader::readMethodAttributes(ares::ClassInfo &classInfo,
 }
 
 void ares::ClassReader::visitMethodAttribute(ares::ClassInfo &classInfo,
-                                             ares::MethodInfo &methodInfo,
+                                             ares::MethodInfo &,
                                              ares::AttributeInfo &attributeInfo) {
     ClassReader::visitClassAttribute(classInfo, attributeInfo);
 }

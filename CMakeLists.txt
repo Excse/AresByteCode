@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 3.16.3)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+cmake_minimum_required(VERSION 3.29.6)
 
 set(ARES_VERSION_MAJOR 0)
 set(ARES_VERSION_MINOR 1)
@@ -11,7 +8,64 @@ set(ARES_VERSION ${ARES_VERSION_MAJOR}.${ARES_VERSION_MINOR}.${ARES_VERSION_PATC
 set(ARES_DESCRIPTION "AresByteCode is a library to interact with java bytecode and provides also utils to load/write jar files.")
 
 project(aresbc VERSION ${ARES_VERSION} DESCRIPTION ${ARES_DESCRIPTION})
-add_subdirectory(src)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wpedantic -Wswitch -fsanitize=address,undefined,leak")
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+include(FetchContent)
+
+# =====================
+# Google Test
+# =====================
+
+FetchContent_Declare(
+        google_test
+        URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip
+)
+
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(google_test)
+
+# =====================
+# LibZip
+# =====================
+
+FetchContent_Declare(
+        libzip
+        GIT_REPOSITORY https://github.com/nih-at/libzip.git
+        GIT_TAG main
+)
+
+FetchContent_MakeAvailable(libzip)
+
+# =====================
+# Library
+# =====================
+
+include_directories(include)
+
+add_library(${PROJECT_NAME}_lib
+    src/reader/classreader.cpp
+    src/structure/attributeinfo.cpp
+    src/structure/classinfo.cpp
+    src/structure/constantinfo.cpp
+    src/structure/fieldinfo.cpp
+    src/structure/methodinfo.cpp
+    src/utils/utils.cpp
+    src/visitor/vmcheck.cpp
+    src/writer/classwriter.cpp)
+
+target_link_libraries(${PROJECT_NAME}_lib zip)
+
+# =====================
+# Tests
+# =====================
 
 enable_testing()
-add_subdirectory(tests)
+
+add_executable(${PROJECT_NAME}_tests
+        tests/main.cpp)
+
+target_link_libraries(${PROJECT_NAME}_tests gtest gtest_main ${PROJECT_NAME}_lib zip)
+add_test(NAME test_${PROJECT_NAME} COMMAND test_${PROJECT_NAME})

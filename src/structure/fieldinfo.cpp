@@ -1,6 +1,6 @@
-#include "../../include/fieldinfo.h"
+#include "fieldinfo.h"
 
-#include "../../include/attributeinfo.h"
+#include "attributeinfo.h"
 
 ares::FieldInfo::FieldInfo() = default;
 

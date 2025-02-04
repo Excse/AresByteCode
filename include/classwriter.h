@@ -4,51 +4,47 @@
 
 namespace ares {
 
-    class ClassWriter : Visitor {
+class ClassWriter : Visitor {
+public:
+    explicit ClassWriter(unsigned int offset = 0);
 
-    private:
-        unsigned int m_Offset{}, m_Size{};
-        uint8_t *m_ByteCode{};
+    virtual ~ClassWriter();
 
-    public:
-        explicit ClassWriter(unsigned int offset = 0);
+public:
+    void visitClass(ClassInfo &classInfo) override;
 
-        virtual ~ClassWriter();
+    [[nodiscard]] uint8_t *getByteCode() const;
 
-    public:
-        void visitClass(ClassInfo &classInfo) override;
+private:
+    void visitClassCPInfo(ares::ClassInfo &classInfo,
+                          ares::ConstantPoolInfo &info) override;
 
-    private:
-        void visitClassCPInfo(ares::ClassInfo &classInfo,
-                              ares::ConstantPoolInfo &info) override;
+    void visitClassInterface(ares::ClassInfo &classInfo,
+                             uint16_t interface) override;
 
-        void visitClassInterface(ares::ClassInfo &classInfo,
-                                 uint16_t interface) override;
+    void visitClassField(ares::ClassInfo &classInfo,
+                         ares::FieldInfo &fieldInfo) override;
 
-        void visitClassField(ares::ClassInfo &classInfo,
-                             ares::FieldInfo &fieldInfo) override;
+    void visitClassMethod(ares::ClassInfo &classInfo,
+                          ares::MethodInfo &methodInfo) override;
 
-        void visitClassMethod(ares::ClassInfo &classInfo,
-                              ares::MethodInfo &methodInfo) override;
+    void visitClassAttribute(ares::ClassInfo &classInfo,
+                             ares::AttributeInfo &attributeInfo) override;
 
-        void visitClassAttribute(ares::ClassInfo &classInfo,
-                                 ares::AttributeInfo &attributeInfo) override;
+    void visitFieldAttribute(ares::ClassInfo &classInfo,
+                             ares::FieldInfo &fieldInfo,
+                             ares::AttributeInfo &attributeInfo) override;
 
-        void visitFieldAttribute(ares::ClassInfo &classInfo,
-                                 ares::FieldInfo &fieldInfo,
-                                 ares::AttributeInfo &attributeInfo) override;
+    void visitMethodAttribute(ares::ClassInfo &classInfo,
+                              ares::MethodInfo &methodInfo,
+                              ares::AttributeInfo &attributeInfo) override;
 
-        void visitMethodAttribute(ares::ClassInfo &classInfo,
-                                  ares::MethodInfo &methodInfo,
-                                  ares::AttributeInfo &attributeInfo) override;
+private:
+    unsigned int m_Offset{}, m_Size{};
+    uint8_t *m_ByteCode{};
+};
 
-    public:
-        [[nodiscard]]
-        uint8_t *getByteCode() const;
-
-    };
-
-}
+} // namespace ares
 
 //==============================================================================
 // BSD 3-Clause License

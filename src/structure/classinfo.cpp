@@ -1,10 +1,9 @@
-#include <iostream>
-#include "../../include/classinfo.h"
+#include "classinfo.h"
 
-#include "../../include/attributeinfo.h"
-#include "../../include/constantinfo.h"
-#include "../../include/methodinfo.h"
-#include "../../include/fieldinfo.h"
+#include "attributeinfo.h"
+#include "constantinfo.h"
+#include "methodinfo.h"
+#include "fieldinfo.h"
 
 ares::ClassInfo::ClassInfo() = default;
 

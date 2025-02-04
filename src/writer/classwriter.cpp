@@ -47,7 +47,7 @@ void ares::ClassWriter::visitClass(ares::ClassInfo &classInfo) {
         ClassWriter::visitClassAttribute(classInfo, *attributeInfo);
 }
 
-void ares::ClassWriter::visitClassCPInfo(ares::ClassInfo &classInfo,
+void ares::ClassWriter::visitClassCPInfo(ares::ClassInfo &,
                                          ares::ConstantPoolInfo &info) {
     ares::writeU8((uint8_t &) info.m_Tag, m_ByteCode, m_Size, m_Offset);
 
@@ -111,7 +111,7 @@ void ares::ClassWriter::visitClassCPInfo(ares::ClassInfo &classInfo,
     }
 }
 
-void ares::ClassWriter::visitClassInterface(ares::ClassInfo &classInfo, uint16_t interface) {}
+void ares::ClassWriter::visitClassInterface(ares::ClassInfo &, uint16_t) {}
 
 void ares::ClassWriter::visitClassField(ares::ClassInfo &classInfo,
                                         ares::FieldInfo &fieldInfo) {
@@ -135,7 +135,7 @@ void ares::ClassWriter::visitClassMethod(ares::ClassInfo &classInfo,
         ClassWriter::visitMethodAttribute(classInfo, methodInfo, *attributeInfo);
 }
 
-void ares::ClassWriter::visitClassAttribute(ares::ClassInfo &classInfo,
+void ares::ClassWriter::visitClassAttribute(ares::ClassInfo &,
                                             ares::AttributeInfo &attributeInfo) {
     ares::writeU16(attributeInfo.m_AttributeNameIndex, m_ByteCode, m_Size, m_Offset);
     ares::writeU32(attributeInfo.m_AttributeLength, m_ByteCode, m_Size, m_Offset);
@@ -145,13 +145,13 @@ void ares::ClassWriter::visitClassAttribute(ares::ClassInfo &classInfo,
 }
 
 void ares::ClassWriter::visitFieldAttribute(ares::ClassInfo &classInfo,
-                                            ares::FieldInfo &fieldInfo,
+                                            ares::FieldInfo &,
                                             ares::AttributeInfo &attributeInfo) {
     ClassWriter::visitClassAttribute(classInfo, attributeInfo);
 }
 
 void ares::ClassWriter::visitMethodAttribute(ares::ClassInfo &classInfo,
-                                             ares::MethodInfo &methodInfo,
+                                             ares::MethodInfo &,
                                              ares::AttributeInfo &attributeInfo) {
     ClassWriter::visitClassAttribute(classInfo, attributeInfo);
 }

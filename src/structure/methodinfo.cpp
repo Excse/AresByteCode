@@ -1,6 +1,6 @@
-#include "../../include/methodinfo.h"
+#include "methodinfo.h"
 
-#include "../../include/attributeinfo.h"
+#include "attributeinfo.h"
 
 ares::MethodInfo::MethodInfo() = default;
 

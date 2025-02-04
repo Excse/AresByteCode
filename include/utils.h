@@ -9,60 +9,56 @@
 
 namespace ares {
 
-    class Manifest {
+class Manifest {
+public:
+    Manifest();
 
-    public:
-        std::unordered_map<std::string, std::string> m_Data{};
+    virtual ~Manifest();
 
-    public:
-        Manifest();
+public:
+    [[nodiscard]] std::string getContent();
 
-        virtual ~Manifest();
+public:
+    std::unordered_map <std::string, std::string> m_Data{};
+};
 
-    public:
-        std::string getContent();
+class AresConfiguration {
+public:
+    AresConfiguration();
 
-    };
+    virtual ~AresConfiguration();
 
-    class AresConfiguration {
+public:
+    std::unordered_map <std::string, std::pair<uint8_t *, unsigned int>> m_Others{};
+    std::unordered_map <std::string, std::shared_ptr<ares::ClassInfo>> m_Classes{};
+    std::shared_ptr <ares::Manifest> m_Manifest{};
+};
 
-    public:
-        std::unordered_map<std::string, std::pair<uint8_t *, unsigned int>> m_Others{};
-        std::unordered_map<std::string, std::shared_ptr<ares::ClassInfo>> m_Classes{};
-        std::shared_ptr<ares::Manifest> m_Manifest{};
+int readManifest(std::string &content, ares::Manifest &manifest);
 
-    public:
-        AresConfiguration();
+int readJarFile(const std::string &path, ares::AresConfiguration &configuration);
 
-        virtual ~AresConfiguration();
+int writeJarFile(const std::string &path, const ares::AresConfiguration &configuration);
 
-    };
+int readU32(uint32_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
-    int readManifest(std::string &content, ares::Manifest &manifest);
+int writeU32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
-    int readJarFile(const std::string &path, ares::AresConfiguration &configuration);
+int readU16(uint16_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
-    int writeJarFile(const std::string &path, const ares::AresConfiguration &configuration);
+int writeU16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
-    int readU32(uint32_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
+int readU8(uint8_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
-    int writeU32(uint32_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
+int writeU8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
 
-    int readU16(uint16_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
+int readU8Array(uint8_t *data, unsigned int length, uint8_t *byteCode, unsigned int size,
+                unsigned int &offset);
 
-    int writeU16(uint16_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
+int writeU8Array(uint8_t *data, unsigned int dataSize, uint8_t *byteCode, unsigned int size,
+                 unsigned int &offset);
 
-    int readU8(uint8_t &data, const uint8_t *byteCode, unsigned int size, unsigned int &offset);
-
-    int writeU8(uint8_t &data, uint8_t *byteCode, unsigned int size, unsigned int &offset);
-
-    int readU8Array(uint8_t *data, unsigned int length, uint8_t *byteCode, unsigned int size,
-                    unsigned int &offset);
-
-    int writeU8Array(uint8_t *data, unsigned int dataSize, uint8_t *byteCode, unsigned int size,
-                     unsigned int &offset);
-
-}
+} // namespace ares
 
 //==============================================================================
 // BSD 3-Clause License

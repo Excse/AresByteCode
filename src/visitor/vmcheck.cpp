@@ -282,13 +282,13 @@ void ares::VMCheck::visitClassAttribute(ares::ClassInfo &classInfo,
 }
 
 void ares::VMCheck::visitFieldAttribute(ares::ClassInfo &classInfo,
-                                        ares::FieldInfo &fieldInfo,
+                                        ares::FieldInfo &,
                                         ares::AttributeInfo &attributeInfo) {
     VMCheck::visitClassAttribute(classInfo, attributeInfo);
 }
 
 void ares::VMCheck::visitMethodAttribute(ares::ClassInfo &classInfo,
-                                         ares::MethodInfo &methodInfo,
+                                         ares::MethodInfo &,
                                          ares::AttributeInfo &attributeInfo) {
     VMCheck::visitClassAttribute(classInfo, attributeInfo);
 }

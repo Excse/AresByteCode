@@ -1,5 +1,4 @@
-
-#include "../../include/attributeinfo.h"
+#include "attributeinfo.h"
 
 ares::AttributeInfo::AttributeInfo() = default;
 

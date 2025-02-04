@@ -1,4 +1,3 @@
-
 # Locate libzip
 # This module defines
 # LIBZIP_LIBRARY
