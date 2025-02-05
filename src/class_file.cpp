@@ -1,4 +1,4 @@
-#include "class_info.h"
+#include "class_file.h"
 
 #include "attribute_info.h"
 #include "constant_info.h"

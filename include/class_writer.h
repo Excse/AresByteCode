@@ -29,6 +29,15 @@ private:
     void visit_method_attribute(ClassFile &class_info, MethodInfo &method_info, AttributeInfo &attribute_info) override;
 
 private:
+    auto write_u8(uint8_t & data, ClassFile &class_file) -> bool;
+
+    auto write_u32(uint32_t & data, ClassFile &class_file) -> bool;
+
+    auto write_u16(uint16_t & data, ClassFile &class_file) -> bool;
+
+    auto write_u8_array(uint8_t *data, unsigned int data_size, ClassFile &class_file) -> bool;
+
+private:
     unsigned int _offset{}, _size{};
     std::vector<uint8_t> _byte_code{};
 };

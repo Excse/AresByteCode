@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 
-#include "class_info.h"
+#include "class_file.h"
 
 namespace ares {
 
@@ -29,40 +29,6 @@ auto read_manifest(std::string &content) -> Manifest;
 auto read_jar_file(const std::string &path, Configuration &configuration) -> int;
 
 auto write_jar_file(const std::string &path, const Configuration &configuration) -> int;
-
-auto read_u32(uint32_t & data,
-              const std::vector<uint8_t> &byte_code,
-              unsigned int &offset) -> bool;
-
-auto write_u32(uint32_t & data,
-               std::vector<uint8_t> &byte_code,
-               unsigned int &offset) -> bool;
-
-auto read_u16(uint16_t & data,
-              const std::vector<uint8_t> &byte_code,
-              unsigned int &offset) -> bool;
-
-auto write_u16(uint16_t & data,
-               std::vector<uint8_t> &byte_code,
-               unsigned int &offset) -> bool;
-
-auto read_u8(uint8_t & data,
-             const std::vector<uint8_t> &byte_code,
-             unsigned int &offset) -> bool;
-
-auto write_u8(uint8_t & data,
-              std::vector<uint8_t> &byte_code,
-              unsigned int &offset) -> bool;
-
-auto read_u8_array(uint8_t *data,
-                   unsigned int length,
-                   const std::vector<uint8_t> &byte_code,
-                   unsigned int &offset) -> bool;
-
-auto write_u8_array(uint8_t *data,
-                    unsigned int data_size,
-                    std::vector<uint8_t> &byte_code,
-                    unsigned int &offset) -> bool;
 
 } // namespace ares
 

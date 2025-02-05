@@ -55,7 +55,7 @@ include_directories(include)
 add_library(${PROJECT_NAME}_lib
         src/class_reader.cpp
         src/attribute_info.cpp
-        src/class_info.cpp
+        src/class_file.cpp
         src/constant_info.cpp
         src/field_info.cpp
         src/method_info.cpp

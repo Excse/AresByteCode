@@ -3,7 +3,7 @@
 #include "attribute_info.h"
 #include "constant_info.h"
 #include "method_info.h"
-#include "class_info.h"
+#include "class_file.h"
 #include "field_info.h"
 #include "visitor.h"
 

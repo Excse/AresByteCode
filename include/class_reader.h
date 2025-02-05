@@ -9,7 +9,7 @@
 
 #include "attribute_info.h"
 #include "constant_info.h"
-#include "class_info.h"
+#include "class_file.h"
 #include "visitor.h"
 
 namespace ares {
@@ -83,6 +83,15 @@ private:
     void read_method_attributes(ClassFile &class_info, MethodInfo &method_info);
 
     void visit_method_attribute(ClassFile &class_info, MethodInfo &method_info, AttributeInfo &attribute_info) override;
+
+private:
+    auto read_u8(uint8_t &data, ClassFile &class_info) -> bool;
+
+    auto read_u16(uint16_t &data, ClassFile &class_info) -> bool;
+
+    auto read_u32(uint32_t &data, ClassFile &class_info) -> bool;
+
+    auto read_u8_array(uint8_t *data, unsigned int length, ClassFile &class_info) -> bool;
 
 private:
     unsigned int _offset{};

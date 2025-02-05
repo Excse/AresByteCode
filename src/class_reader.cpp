@@ -6,16 +6,16 @@
 
 using namespace ares;
 
-#define CHECKED_READ(size, target, error_message)               \
-    if(!read_##size(target, class_file.byte_code, _offset)) {   \
-        std::cerr << error_message << std::endl;                \
-        abort();                                                \
+#define CHECKED_READ(size, target, error_message)           \
+    if(!ClassReader::read_##size(target, class_file)) {     \
+        std::cerr << error_message << std::endl;            \
+        abort();                                            \
     }
 
-#define CHECKED_ARRAY_READ(size, target, length, error_message)                 \
-    if(!read_##size##_array(target, length, class_file.byte_code, _offset)) {   \
-        std::cerr << error_message << std::endl;                                \
-        abort();                                                                \
+#define CHECKED_ARRAY_READ(size, target, length, error_message)             \
+    if(!ClassReader::read_##size##_array(target, length, class_file)) {     \
+        std::cerr << error_message << std::endl;                            \
+        abort();                                                            \
     }
 
 ClassReader::ClassReader(unsigned int offset) : _offset(offset) {}
@@ -288,6 +288,58 @@ void ClassReader::visit_method_attribute(ClassFile &class_file, MethodInfo &, At
 
 auto ClassReader::offset() const -> unsigned int {
     return _offset;
+}
+
+auto ClassReader::read_u8(uint8_t &data, ClassFile &class_file) -> bool {
+    if (_offset + 1 > class_file.byte_code.size()) {
+        std::cerr << "Couldn't read u8 because it is out of bounds." << std::endl;
+        return false;
+    }
+
+    data = static_cast<uint32_t>(class_file.byte_code[_offset + 0]);
+    _offset += 1;
+
+    return true;
+}
+
+auto ClassReader::read_u16(uint16_t &data, ClassFile &class_file) -> bool {
+    if (_offset + 2 > class_file.byte_code.size()) {
+        std::cerr << "Couldn't read u16 because it is out of bounds." << std::endl;
+        return false;
+    }
+
+    data = (static_cast<uint32_t>(class_file.byte_code[_offset + 0]) << 8) |
+           (static_cast<uint32_t>(class_file.byte_code[_offset + 1]));
+    _offset += 2;
+
+    return true;
+}
+
+auto ClassReader::read_u32(uint32_t &data, ClassFile &class_file) -> bool {
+    if (_offset + 4 > class_file.byte_code.size()) {
+        std::cerr << "Couldn't read u32 because it is out of bounds." << std::endl;
+        return false;
+    }
+
+    data = (static_cast<uint32_t>(class_file.byte_code[_offset + 0]) << 24) |
+           (static_cast<uint32_t>(class_file.byte_code[_offset + 1]) << 16) |
+           (static_cast<uint32_t>(class_file.byte_code[_offset + 2]) << 8) |
+           (static_cast<uint32_t>(class_file.byte_code[_offset + 3]));
+    _offset += 4;
+
+    return true;
+}
+
+auto ClassReader::read_u8_array(uint8_t *data, unsigned int length, ClassFile &class_file) -> bool {
+    if ((_offset + length) > class_file.byte_code.size()) {
+        std::cerr << "Couldn't read the u8 array because it is out of bounds." << std::endl;
+        return false;
+    }
+
+    for (size_t index = 0; index < length; index++)
+        read_u8(data[index], class_file);
+
+    return true;
 }
 
 //==============================================================================
