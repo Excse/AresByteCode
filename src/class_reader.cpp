@@ -7,13 +7,13 @@
 using namespace ares;
 
 #define CHECKED_READ(size, target, error_message)               \
-    if(!read_##size(target, class_file.byte_code, _offset)) {    \
+    if(!read_##size(target, class_file.byte_code, _offset)) {   \
         std::cerr << error_message << std::endl;                \
         abort();                                                \
     }
 
 #define CHECKED_ARRAY_READ(size, target, length, error_message)                 \
-    if(!read_##size##_array(target, length, class_file.byte_code, _offset)) {    \
+    if(!read_##size##_array(target, length, class_file.byte_code, _offset)) {   \
         std::cerr << error_message << std::endl;                                \
         abort();                                                                \
     }
@@ -44,21 +44,20 @@ void ClassReader::read_class_attributes(ClassFile &class_file) {
 }
 
 void ClassReader::visit_class_attribute(ClassFile &class_file, AttributeInfo &attribute_info) {
-    CHECKED_READ(u16, attribute_info.attribute_name_index, "Couldn't read the name index of the attribute.")
-    CHECKED_READ(u32, attribute_info.attribute_length, "Couldn't read the length of the attribute.")
+    CHECKED_READ(u16, attribute_info.attribute_name_index, "Couldn't read the name index.")
+    CHECKED_READ(u32, attribute_info.attribute_length, "Couldn't read the length.")
 
     attribute_info.info = new uint8_t[attribute_info.attribute_length];
-    CHECKED_ARRAY_READ(u8, attribute_info.info, attribute_info.attribute_length,
-                       "Couldn't read the info of the attribute.")
+    CHECKED_ARRAY_READ(u8, attribute_info.info, attribute_info.attribute_length, "Couldn't read the info.")
 }
 
 void ClassReader::read_magic_number(ClassFile &class_file) {
-    CHECKED_READ(u32, class_file.magic_number, "Couldn't read the magic number of the class file.")
+    CHECKED_READ(u32, class_file.magic_number, "Couldn't read the magic number.")
 }
 
 void ClassReader::read_class_version(ClassFile &class_file) {
-    CHECKED_READ(u16, class_file.minor_version, "Couldn't read the minor version of the class file.")
-    CHECKED_READ(u16, class_file.major_version, "Couldn't read the major version of the class file.")
+    CHECKED_READ(u16, class_file.minor_version, "Couldn't read the minor version.")
+    CHECKED_READ(u16, class_file.major_version, "Couldn't read the major version.")
 
     class_file.class_version = ClassFile::UNDEFINED;
     if (class_file.major_version >= ClassFile::VERSION_1_1 && class_file.major_version <= ClassFile::VERSION_15) {
@@ -67,7 +66,7 @@ void ClassReader::read_class_version(ClassFile &class_file) {
 }
 
 void ClassReader::read_constant_pool(ClassFile &class_file) {
-    CHECKED_READ(u16, class_file.constant_pool_count, "Couldn't read the constant pool count of this class file")
+    CHECKED_READ(u16, class_file.constant_pool_count, "Couldn't read the constant pool count.")
 
     class_file.constant_pool = std::vector<ConstantPoolInfo>(class_file.constant_pool_count - 1);
 
@@ -83,7 +82,7 @@ void ClassReader::read_constant_pool(ClassFile &class_file) {
 
 void ClassReader::visit_classpool_info(ClassFile &class_file, ConstantPoolInfo &info) {
     uint8_t infoTag{};
-    CHECKED_READ(u8, infoTag, "Couldn't read the tag of the constant pool info of this class file")
+    CHECKED_READ(u8, infoTag, "Couldn't read the tag.")
 
     if (infoTag >= ConstantPoolInfo::UTF_8 && infoTag <= ConstantPoolInfo::PACKAGE && infoTag != 13 && infoTag != 14) {
         info.tag = ConstantPoolInfo::ConstantTag(infoTag);
@@ -148,85 +147,83 @@ void ClassReader::visit_classpool_info(ClassFile &class_file, ConstantPoolInfo &
 }
 
 void ClassReader::read_class_info(ClassFile &class_file, ConstantInfo::ClassInfo &info) {
-    CHECKED_READ(u16, info.name_index, "Couldn't read the name index of the class pool info.")
+    CHECKED_READ(u16, info.name_index, "Couldn't read the name index.")
 }
 
 void ClassReader::read_utf8_info(ClassFile &class_file, ConstantInfo::UTF8Info &info) {
-    CHECKED_READ(u16, info.length, "Couldn't read the length of the class pool info.")
+    CHECKED_READ(u16, info.length, "Couldn't read the length.")
 
     info.bytes = new uint8_t[info.length];
-    CHECKED_ARRAY_READ(u8, info.bytes, info.length, "Couldn't read the bytes of the class pool info.")
+    CHECKED_ARRAY_READ(u8, info.bytes, info.length, "Couldn't read the bytes.")
 }
 
 void ClassReader::read_field_method_info(ClassFile &class_file, ConstantInfo::FieldMethodInfo &info) {
-    CHECKED_READ(u16, info.class_index, "Couldn't read the class index of the class pool info.")
-    CHECKED_READ(u16, info.name_and_type_index, "Couldn't read the name and type index of the class pool info.")
+    CHECKED_READ(u16, info.class_index, "Couldn't read the class index.")
+    CHECKED_READ(u16, info.name_and_type_index, "Couldn't read the name and type index.")
 }
 
 void ClassReader::read_name_and_type(ClassFile &class_file, ConstantInfo::NameAndTypeInfo &info) {
-    CHECKED_READ(u16, info.name_index, "Couldn't read the name index of the class pool info.")
-    CHECKED_READ(u16, info.descriptor_index, "Couldn't read the descriptor index of the class pool info.")
+    CHECKED_READ(u16, info.name_index, "Couldn't read the name index.")
+    CHECKED_READ(u16, info.descriptor_index, "Couldn't read the descriptor index.")
 }
 
 void ClassReader::read_string_info(ClassFile &class_file, ConstantInfo::StringInfo &info) {
-    CHECKED_READ(u16, info.string_index, "Couldn't read the string index of the class pool info.")
+    CHECKED_READ(u16, info.string_index, "Couldn't read the string index.")
 }
 
 void ClassReader::read_double_long(ClassFile &class_file, ConstantInfo::DoubleLongInfo &info) {
-    CHECKED_READ(u32, info.high_bytes, "Couldn't read the high bytes of the class pool info.")
-
-    CHECKED_READ(u32, info.low_bytes, "Couldn't read the low bytes of the class pool info.")
+    CHECKED_READ(u32, info.high_bytes, "Couldn't read the high bytes.")
+    CHECKED_READ(u32, info.low_bytes, "Couldn't read the low bytes.")
 }
 
 void ClassReader::read_float_integer(ClassFile &class_file, ConstantInfo::FloatIntegerInfo &info) {
-    CHECKED_READ(u32, info.bytes, "Couldn't read the bytes of the class pool info.")
+    CHECKED_READ(u32, info.bytes, "Couldn't read the bytes.")
 }
 
 void ClassReader::read_method_type(ClassFile &class_file, ConstantInfo::MethodTypeInfo &info) {
-    CHECKED_READ(u16, info.descriptor_index, "Couldn't read the descriptor index of the class pool info.")
+    CHECKED_READ(u16, info.descriptor_index, "Couldn't read the descriptor index.")
 }
 
 void ClassReader::read_method_handle(ClassFile &class_file, ConstantInfo::MethodHandleInfo &info) {
-    CHECKED_READ(u8, info.reference_kind, "Couldn't read the reference kind of the class pool info.")
-    CHECKED_READ(u16, info.reference_index, "Couldn't read the reference index of the class pool info.")
+    CHECKED_READ(u8, info.reference_kind, "Couldn't read the reference kind.")
+    CHECKED_READ(u16, info.reference_index, "Couldn't read the reference index.")
 }
 
 void ClassReader::read_dynamic(ClassFile &class_file, ConstantInfo::DynamicInfo &info) {
-    CHECKED_READ(u16, info.boostrap_method_attr_index,
-                 "Couldn't read the bootstrap method attribute index of the class pool info.")
-    CHECKED_READ(u16, info.name_and_type_index, "Couldn't read the name and type index for the class pool info.")
+    CHECKED_READ(u16, info.boostrap_method_attr_index, "Couldn't read the bootstrap method attribute index.")
+    CHECKED_READ(u16, info.name_and_type_index, "Couldn't read the name and type index.")
 }
 
 void ClassReader::read_module_package(ClassFile &class_file, ConstantInfo::ModulePackageInfo &info) {
-    CHECKED_READ(u16, info.name_index, "Couldn't read the name index of the class pool info.")
+    CHECKED_READ(u16, info.name_index, "Couldn't read the name index.")
 }
 
 void ClassReader::read_access_flags(ClassFile &class_file) {
-    CHECKED_READ(u16, class_file.access_flags, "Couldn't read the access flags of the class file.")
+    CHECKED_READ(u16, class_file.access_flags, "Couldn't read the access flags.")
 }
 
 void ClassReader::read_this_class(ClassFile &class_file) {
-    CHECKED_READ(u16, class_file.this_class, "Couldn't read the \"this class\" of this class file.")
+    CHECKED_READ(u16, class_file.this_class, "Couldn't read the \"this class\".")
 }
 
 void ClassReader::read_super_class(ClassFile &class_file) {
-    CHECKED_READ(u16, class_file.super_class, "Couldn't read the \"super class\" of the class file.")
+    CHECKED_READ(u16, class_file.super_class, "Couldn't read the \"super class\".")
 }
 
 void ClassReader::read_interfaces(ClassFile &class_file) {
-    CHECKED_READ(u16, class_file.interfaces_count, "Couldn't read the interface count of the class file.")
+    CHECKED_READ(u16, class_file.interfaces_count, "Couldn't read the interface count.")
 
     class_file.interfaces = std::vector<uint16_t>(class_file.interfaces_count);
 
     for (auto &interface: class_file.interfaces) {
-        CHECKED_READ(u16, interface, "Couldn't read the interface of this class.")
+        CHECKED_READ(u16, interface, "Couldn't read the interface.")
     }
 }
 
 void ClassReader::visit_class_interface(ClassFile &, uint16_t) {}
 
 void ClassReader::read_fields(ClassFile &class_file) {
-    CHECKED_READ(u16, class_file.fields_count, "Couldn't read the field count of the class file.")
+    CHECKED_READ(u16, class_file.fields_count, "Couldn't read the field count.")
 
     class_file.fields = std::vector<FieldInfo>(class_file.fields_count);
 
@@ -236,9 +233,10 @@ void ClassReader::read_fields(ClassFile &class_file) {
 }
 
 void ClassReader::visit_class_field(ClassFile &class_file, FieldInfo &field_info) {
-    CHECKED_READ(u16, field_info.access_flags, "Couldn't read the access flags of the field.")
-    CHECKED_READ(u16, field_info.name_index, "Couldn't read the name index of the field.")
-    CHECKED_READ(u16, field_info.descriptor_index, "Couldn't read the descriptor index of the field.")
+    CHECKED_READ(u16, field_info.access_flags, "Couldn't read the access flags.")
+    CHECKED_READ(u16, field_info.name_index, "Couldn't read the name index.")
+    CHECKED_READ(u16, field_info.descriptor_index, "Couldn't read the descriptor index.")
+
     read_field_attributes(class_file, field_info);
 }
 
@@ -257,7 +255,7 @@ void ClassReader::visit_field_attribute(ClassFile &class_file, FieldInfo &, Attr
 }
 
 void ClassReader::read_methods(ClassFile &class_file) {
-    CHECKED_READ(u16, class_file.method_count, "Couldn't read the method count of the class file.")
+    CHECKED_READ(u16, class_file.method_count, "Couldn't read the method count.")
 
     class_file.methods = std::vector<MethodInfo>(class_file.method_count);
 
@@ -267,9 +265,9 @@ void ClassReader::read_methods(ClassFile &class_file) {
 }
 
 void ClassReader::visit_class_method(ClassFile &class_file, MethodInfo &method_info) {
-    CHECKED_READ(u16, method_info.access_flags, "Couldn't read the access flags of the method.")
-    CHECKED_READ(u16, method_info.name_index, "Couldn't read the name index of the method.")
-    CHECKED_READ(u16, method_info.descriptor_index, "Couldn't read the descriptor index of the method.")
+    CHECKED_READ(u16, method_info.access_flags, "Couldn't read the access flags.")
+    CHECKED_READ(u16, method_info.name_index, "Couldn't read the name index.")
+    CHECKED_READ(u16, method_info.descriptor_index, "Couldn't read the descriptor index.")
 
     read_method_attributes(class_file, method_info);
 }
