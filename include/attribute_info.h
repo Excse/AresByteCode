@@ -37,7 +37,7 @@ public:
 public:
     uint16_t attribute_name_index{};
     uint32_t attribute_length{};
-    std::vector <uint8_t> info{};
+    uint8_t *info{};
 };
 
 } // namespace ares

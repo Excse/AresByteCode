@@ -2,14 +2,16 @@
 
 #include "attribute_info.h"
 
-auto ares::MethodInfo::has_access_flag(AccessFlag access_flag) const -> bool {
+using namespace ares;
+
+auto MethodInfo::has_access_flag(AccessFlag access_flag) const -> bool {
     return access_flags & access_flag;
 }
 
-auto ares::MethodInfo::size() const -> unsigned int {
+auto MethodInfo::size() const -> unsigned int {
     size_t size = 8;
-    for(const auto &attributeInfo : attributes)
-        size += attributeInfo->size();
+    for(const auto &attribute_info : attributes)
+        size += attribute_info.size();
     return size;
 }
 

@@ -10,7 +10,9 @@
 #include "class_reader.h"
 #include "class_writer.h"
 
-auto ares::Manifest::content() -> std::string {
+using namespace ares;
+
+auto Manifest::content() const -> std::string {
     std::stringstream content;
     for (const auto &line: data) {
         content << line.first << ": " << line.second << std::endl;
@@ -18,10 +20,11 @@ auto ares::Manifest::content() -> std::string {
     return content.str();
 }
 
-auto ares::read_manifest(std::string &content, Manifest &manifest) -> int {
+auto ares::read_manifest(std::string &content) -> Manifest {
     std::istringstream stream(content);
     std::string line;
 
+    Manifest manifest;
     while (std::getline(stream, line)) {
         boost::algorithm::trim(line);
 
@@ -45,7 +48,7 @@ auto ares::read_manifest(std::string &content, Manifest &manifest) -> int {
         manifest.data.emplace(std::move(key), std::move(value));
     }
 
-    return EXIT_SUCCESS;
+    return manifest;
 }
 
 auto ares::read_jar_file(const std::string &path, Configuration &configuration) -> int {
@@ -95,18 +98,17 @@ auto ares::read_jar_file(const std::string &path, Configuration &configuration) 
         zip_fclose(file);
 
         if (name == "META-INF/MANIFEST.MF") {
-            auto manifest = std::make_shared<Manifest>();
             auto content = std::string(reinterpret_cast<char *>(data.data()), stat.size);
-            ares::read_manifest(content, *manifest);
+            auto manifest = read_manifest(content);
             configuration.manifest = manifest;
         } else if (boost::algorithm::iends_with(name, ".class")) {
-            auto classInfo = std::make_shared<ClassInfo>();
-            classInfo->byte_code = std::move(data);
+            auto class_file = std::make_shared<ClassFile>();
+            class_file->byte_code = std::move(data);
 
-            configuration.classes.emplace(name, classInfo);
+            configuration.classes.emplace(name, class_file);
 
             ClassReader classReader;
-            classReader.visit_class(*classInfo);
+            classReader.visit_class(*class_file);
 
             if (classReader.offset() != stat.size) {
                 std::cerr << "The offset after reading the class doesn't match the class size" << std::endl;
@@ -141,12 +143,12 @@ auto ares::write_jar_file(const std::string &path, const Configuration &configur
     }
 
     std::vector<uint8_t *> releaseHeap;
-    for (const auto &classInfo : configuration.classes) {
-        ares::ClassWriter classWriter;
-        classWriter.visit_class(*classInfo.second);
+    for (const auto &class_file : configuration.classes) {
+        ClassWriter classWriter;
+        classWriter.visit_class(*class_file.second);
 
         auto stackByteCode = classWriter.byte_code();
-        auto classSize = classInfo.second->size();
+        auto classSize = class_file.second->size();
 
         auto heapByteCode = new uint8_t[classSize];
         for (size_t index = 0; index < classSize; index++) {
@@ -160,7 +162,7 @@ auto ares::write_jar_file(const std::string &path, const Configuration &configur
             return EXIT_FAILURE;
         }
 
-        if (zip_file_add(zip, classInfo.first.c_str(), source, ZIP_FL_UNCHANGED) < 0) {
+        if (zip_file_add(zip, class_file.first.c_str(), source, ZIP_FL_UNCHANGED) < 0) {
             zip_source_free(source);
             std::cerr << zip_strerror(zip) << std::endl;
             return EXIT_FAILURE;
@@ -181,7 +183,7 @@ auto ares::write_jar_file(const std::string &path, const Configuration &configur
         }
     }
 
-    auto manifest = configuration.manifest->content();
+    auto manifest = configuration.manifest.content();
     auto source = zip_source_buffer(zip, manifest.data(), manifest.size(), 0);
     if (source == nullptr) {
         std::cerr << zip_strerror(zip) << std::endl;

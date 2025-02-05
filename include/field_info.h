@@ -11,7 +11,7 @@ namespace ares {
 
 struct AttributeInfo;
 
-class ClassInfo;
+class ClassFile;
 
 class FieldInfo {
 public:

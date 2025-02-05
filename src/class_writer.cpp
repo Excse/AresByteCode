@@ -5,149 +5,149 @@
 #include "constant_info.h"
 #include "utils.h"
 
-ares::ClassWriter::ClassWriter(unsigned int offset) : _offset(offset) {}
+using namespace ares;
 
-void ares::ClassWriter::visit_class(ClassInfo &classInfo) {
-    _size = classInfo.size();
+ClassWriter::ClassWriter(unsigned int offset) : _offset(offset) {}
+
+void ClassWriter::visit_class(ClassFile &class_file) {
+    _size = class_file.size();
     _byte_code = std::vector<uint8_t>(_size);
 
-    ares::write_u32(classInfo.magic_number, _byte_code, _offset);
-    ares::write_u16(classInfo.minor_version, _byte_code, _offset);
-    ares::write_u16(classInfo.major_version, _byte_code, _offset);
+    write_u32(class_file.magic_number, _byte_code, _offset);
+    write_u16(class_file.minor_version, _byte_code, _offset);
+    write_u16(class_file.major_version, _byte_code, _offset);
 
-    ares::write_u16(classInfo.constant_pool_count, _byte_code, _offset);
-    for (auto &constantPoolInfo : classInfo.constant_pool) {
-        if (constantPoolInfo == nullptr)
-            continue;
+    write_u16(class_file.constant_pool_count, _byte_code, _offset);
+    for (auto &constantPoolInfo : class_file.constant_pool)
+        ClassWriter::visit_classpool_info(class_file, constantPoolInfo);
 
-        ClassWriter::visit_classpool_info(classInfo, *constantPoolInfo);
-    }
+    write_u16(class_file.access_flags, _byte_code, _offset);
+    write_u16(class_file.this_class, _byte_code, _offset);
+    write_u16(class_file.super_class, _byte_code, _offset);
 
-    ares::write_u16(classInfo.access_flags, _byte_code, _offset);
-    ares::write_u16(classInfo.this_class, _byte_code, _offset);
-    ares::write_u16(classInfo.super_class, _byte_code, _offset);
+    write_u16(class_file.interfaces_count, _byte_code, _offset);
+    for (auto index = 0; index < class_file.interfaces_count; index++)
+        write_u16(class_file.interfaces[index], _byte_code, _offset);
 
-    ares::write_u16(classInfo.interfaces_count, _byte_code, _offset);
-    for (auto index = 0; index < classInfo.interfaces_count; index++)
-        ares::write_u16(classInfo.interfaces[index], _byte_code, _offset);
+    write_u16(class_file.fields_count, _byte_code, _offset);
+    for (auto &field_info : class_file.fields)
+        ClassWriter::visit_class_field(class_file, field_info);
 
-    ares::write_u16(classInfo.fields_count, _byte_code, _offset);
-    for (const auto &fieldInfo : classInfo.fields)
-        ClassWriter::visit_class_field(classInfo, *fieldInfo);
+    write_u16(class_file.method_count, _byte_code, _offset);
+    for (auto &method_info : class_file.methods)
+        ClassWriter::visit_class_method(class_file, method_info);
 
-    ares::write_u16(classInfo.method_count, _byte_code, _offset);
-    for (const auto &methodInfo : classInfo.methods)
-        ClassWriter::visit_class_method(classInfo, *methodInfo);
-
-    ares::write_u16(classInfo.attributes_count, _byte_code, _offset);
-    for (auto &attributeInfo : classInfo.attributes)
-        ClassWriter::visit_class_attribute(classInfo, *attributeInfo);
+    write_u16(class_file.attributes_count, _byte_code, _offset);
+    for (auto &attribute_info : class_file.attributes)
+        ClassWriter::visit_class_attribute(class_file, attribute_info);
 }
 
-void ares::ClassWriter::visit_classpool_info(ClassInfo &, ConstantPoolInfo &info) {
-    ares::write_u8((uint8_t &) info.tag, _byte_code, _offset);
+void ClassWriter::visit_classpool_info(ClassFile &, ConstantPoolInfo &info) {
+    write_u8((uint8_t &) info.tag, _byte_code, _offset);
 
     switch (info.tag) {
         case ConstantPoolInfo::CLASS: {
-            ares::write_u16(info.info.class_info.name_index, _byte_code, _offset);
+            write_u16(info.info.class_info.name_index, _byte_code, _offset);
             break;
         }
         case ConstantPoolInfo::METHOD_REF:
         case ConstantPoolInfo::FIELD_REF:
         case ConstantPoolInfo::INTERFACE_METHOD_REF: {
-            ares::write_u16(info.info.field_method_info.class_index, _byte_code, _offset);
-            ares::write_u16(info.info.field_method_info.name_and_type_index, _byte_code, _offset);
+            write_u16(info.info.field_method_info.class_index, _byte_code, _offset);
+            write_u16(info.info.field_method_info.name_and_type_index, _byte_code, _offset);
             break;
         }
         case ConstantPoolInfo::STRING: {
-            ares::write_u16(info.info.string_info.string_index, _byte_code, _offset);
+            write_u16(info.info.string_info.string_index, _byte_code, _offset);
             break;
         }
         case ConstantPoolInfo::FLOAT:
         case ConstantPoolInfo::INTEGER: {
-            ares::write_u32(info.info.integer_float_info.bytes, _byte_code, _offset);
+            write_u32(info.info.integer_float_info.bytes, _byte_code, _offset);
             break;
         }
         case ConstantPoolInfo::LONG:
         case ConstantPoolInfo::DOUBLE: {
-            ares::write_u32(info.info.long_double_info.high_bytes, _byte_code, _offset);
-            ares::write_u32(info.info.long_double_info.low_bytes, _byte_code, _offset);
+            write_u32(info.info.long_double_info.high_bytes, _byte_code, _offset);
+            write_u32(info.info.long_double_info.low_bytes, _byte_code, _offset);
             break;
         }
         case ConstantPoolInfo::NAME_AND_TYPE: {
-            ares::write_u16(info.info.name_and_type_info.name_index, _byte_code, _offset);
-            ares::write_u16(info.info.name_and_type_info.descriptor_index, _byte_code, _offset);
+            write_u16(info.info.name_and_type_info.name_index, _byte_code, _offset);
+            write_u16(info.info.name_and_type_info.descriptor_index, _byte_code, _offset);
             break;
         }
         case ConstantPoolInfo::UTF_8: {
-            ares::write_u16(info.info.utf8_info.length, _byte_code, _offset);
-            ares::write_u8_array(info.info.utf8_info.bytes, info.info.utf8_info.length, _byte_code, _offset);
+            write_u16(info.info.utf8_info.length, _byte_code, _offset);
+            write_u8_array(info.info.utf8_info.bytes, info.info.utf8_info.length, _byte_code, _offset);
             break;
         }
         case ConstantPoolInfo::METHOD_HANDLE: {
-            ares::write_u8(info.info.method_handle_info.reference_kind, _byte_code, _offset);
-            ares::write_u16(info.info.method_handle_info.reference_index, _byte_code, _offset);
+            write_u8(info.info.method_handle_info.reference_kind, _byte_code, _offset);
+            write_u16(info.info.method_handle_info.reference_index, _byte_code, _offset);
             break;
         }
         case ConstantPoolInfo::METHOD_TYPE: {
-            ares::write_u16(info.info.method_type_info.descriptor_index, _byte_code, _offset);
+            write_u16(info.info.method_type_info.descriptor_index, _byte_code, _offset);
             break;
         }
         case ConstantPoolInfo::INVOKE_DYNAMIC:
         case ConstantPoolInfo::DYNAMIC:
-            ares::write_u16(info.info.dynamic_info.boostrap_method_attr_index, _byte_code, _offset);
-            ares::write_u16(info.info.dynamic_info.name_and_type_index, _byte_code, _offset);
+            write_u16(info.info.dynamic_info.boostrap_method_attr_index, _byte_code, _offset);
+            write_u16(info.info.dynamic_info.name_and_type_index, _byte_code, _offset);
             break;
         case ConstantPoolInfo::PACKAGE:
         case ConstantPoolInfo::MODULE: {
-            ares::write_u16(info.info.module_package_info.name_index, _byte_code, _offset);
+            write_u16(info.info.module_package_info.name_index, _byte_code, _offset);
             break;
         }
-        default:
-            abort();
+        case ConstantPoolInfo::UNDEFINED: {
+            break;
+        }
     }
 }
 
-void ares::ClassWriter::visit_class_interface(ClassInfo &, uint16_t) {}
+void ClassWriter::visit_class_interface(ClassFile &, uint16_t) {}
 
-void ares::ClassWriter::visit_class_field(ClassInfo &classInfo,
-                                          FieldInfo &fieldInfo) {
-    ares::write_u16(fieldInfo.access_flags, _byte_code, _offset);
-    ares::write_u16(fieldInfo.name_index, _byte_code, _offset);
-    ares::write_u16(fieldInfo.descriptor_index, _byte_code, _offset);
+void ClassWriter::visit_class_field(ClassFile &class_file,
+                                          FieldInfo &field_info) {
+    write_u16(field_info.access_flags, _byte_code, _offset);
+    write_u16(field_info.name_index, _byte_code, _offset);
+    write_u16(field_info.descriptor_index, _byte_code, _offset);
 
-    ares::write_u16(fieldInfo.attributes_count, _byte_code, _offset);
-    for (const auto &attributeInfo : fieldInfo.attributes)
-        ClassWriter::visit_field_attribute(classInfo, fieldInfo, *attributeInfo);
+    write_u16(field_info.attributes_count, _byte_code, _offset);
+    for (const auto &attribute_info : field_info.attributes)
+        ClassWriter::visit_field_attribute(class_file, field_info, *attribute_info);
 }
 
-void ares::ClassWriter::visit_class_method(ClassInfo &classInfo, MethodInfo &methodInfo) {
-    ares::write_u16(methodInfo.access_flags, _byte_code, _offset);
-    ares::write_u16(methodInfo.name_index, _byte_code, _offset);
-    ares::write_u16(methodInfo.descriptor_index, _byte_code, _offset);
+void ClassWriter::visit_class_method(ClassFile &class_file, MethodInfo &method_info) {
+    write_u16(method_info.access_flags, _byte_code, _offset);
+    write_u16(method_info.name_index, _byte_code, _offset);
+    write_u16(method_info.descriptor_index, _byte_code, _offset);
 
-    ares::write_u16(methodInfo.attributes_count, _byte_code, _offset);
-    for (const auto &attributeInfo : methodInfo.attributes)
-        ClassWriter::visit_method_attribute(classInfo, methodInfo, *attributeInfo);
+    write_u16(method_info.attributes_count, _byte_code, _offset);
+    for (auto &attribute_info : method_info.attributes)
+        ClassWriter::visit_method_attribute(class_file, method_info, attribute_info);
 }
 
-void ares::ClassWriter::visit_class_attribute(ClassInfo &, AttributeInfo &attributeInfo) {
-    ares::write_u16(attributeInfo.attribute_name_index, _byte_code, _offset);
-    ares::write_u32(attributeInfo.attribute_length, _byte_code, _offset);
+void ClassWriter::visit_class_attribute(ClassFile &, AttributeInfo &attribute_info) {
+    write_u16(attribute_info.attribute_name_index, _byte_code, _offset);
+    write_u32(attribute_info.attribute_length, _byte_code, _offset);
 
-    for (auto &info : attributeInfo.info)
-        ares::write_u8(info, _byte_code, _offset);
+    for (size_t index = 0; index < attribute_info.attribute_length; index++) {
+        write_u8(attribute_info.info[index], _byte_code, _offset);
+    }
 }
 
-void ares::ClassWriter::visit_field_attribute(ClassInfo &classInfo, FieldInfo &, AttributeInfo &attributeInfo) {
-    ClassWriter::visit_class_attribute(classInfo, attributeInfo);
+void ClassWriter::visit_field_attribute(ClassFile &class_file, FieldInfo &, AttributeInfo &attribute_info) {
+    ClassWriter::visit_class_attribute(class_file, attribute_info);
 }
 
-void ares::ClassWriter::visit_method_attribute(ClassInfo &classInfo, MethodInfo &, AttributeInfo &attributeInfo) {
-    ClassWriter::visit_class_attribute(classInfo, attributeInfo);
+void ClassWriter::visit_method_attribute(ClassFile &class_file, MethodInfo &, AttributeInfo &attribute_info) {
+    ClassWriter::visit_class_attribute(class_file, attribute_info);
 }
 
-auto ares::ClassWriter::byte_code() const -> const std::vector<uint8_t> & {
+auto ClassWriter::byte_code() const -> const std::vector<uint8_t> & {
     return _byte_code;
 }
 

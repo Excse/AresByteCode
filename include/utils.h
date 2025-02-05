@@ -11,7 +11,7 @@ namespace ares {
 
 class Manifest {
 public:
-    [[nodiscard]] auto content() -> std::string;
+    [[nodiscard]] auto content() const -> std::string;
 
 public:
     std::unordered_map <std::string, std::string> data{};
@@ -19,12 +19,12 @@ public:
 
 class Configuration {
 public:
-    std::unordered_map <std::string, std::shared_ptr<ClassInfo>> classes{};
+    std::unordered_map <std::string, std::shared_ptr<ClassFile>> classes{};
     std::unordered_map <std::string, std::vector<uint8_t>> others{};
-    std::shared_ptr <Manifest> manifest{};
+    Manifest manifest{};
 };
 
-auto read_manifest(std::string &content, Manifest &manifest) -> int;
+auto read_manifest(std::string &content) -> Manifest;
 
 auto read_jar_file(const std::string &path, Configuration &configuration) -> int;
 

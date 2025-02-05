@@ -9,24 +9,24 @@ public:
     explicit ClassWriter(unsigned int offset = 0);
 
 public:
-    void visit_class(ClassInfo &class_info) override;
+    void visit_class(ClassFile &class_info) override;
 
     [[nodiscard]] auto byte_code() const -> const std::vector<uint8_t > &;
 
 private:
-    void visit_classpool_info(ClassInfo &class_info, ConstantPoolInfo &info) override;
+    void visit_classpool_info(ClassFile &class_info, ConstantPoolInfo &info) override;
 
-    void visit_class_interface(ClassInfo &class_info, uint16_t interface) override;
+    void visit_class_interface(ClassFile &class_info, uint16_t interface) override;
 
-    void visit_class_field(ClassInfo &class_info, FieldInfo &field_info) override;
+    void visit_class_field(ClassFile &class_info, FieldInfo &field_info) override;
 
-    void visit_class_method(ClassInfo &class_info, MethodInfo &method_info) override;
+    void visit_class_method(ClassFile &class_info, MethodInfo &method_info) override;
 
-    void visit_class_attribute(ClassInfo &class_info, AttributeInfo &attribute_info) override;
+    void visit_class_attribute(ClassFile &class_info, AttributeInfo &attribute_info) override;
 
-    void visit_field_attribute(ClassInfo &class_info, FieldInfo &field_info, AttributeInfo &attribute_info) override;
+    void visit_field_attribute(ClassFile &class_info, FieldInfo &field_info, AttributeInfo &attribute_info) override;
 
-    void visit_method_attribute(ClassInfo &class_info, MethodInfo &method_info, AttributeInfo &attribute_info) override;
+    void visit_method_attribute(ClassFile &class_info, MethodInfo &method_info, AttributeInfo &attribute_info) override;
 
 private:
     unsigned int _offset{}, _size{};

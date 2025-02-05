@@ -5,27 +5,26 @@
 #include "method_info.h"
 #include "field_info.h"
 
-auto ares::ClassInfo::is_valid_index(unsigned int index) const -> bool {
+using namespace ares;
+
+auto ClassFile::is_valid_index(unsigned int index) const -> bool {
     return index > 0 && index < constant_pool_count;
 }
 
-auto ares::ClassInfo::has_access_flag(AccessFlag access_flag) const -> bool {
+auto ClassFile::has_access_flag(AccessFlag access_flag) const -> bool {
     return access_flags & access_flag;
 }
 
-auto ares::ClassInfo::size() const -> unsigned int {
+auto ClassFile::size() const -> unsigned int {
     size_t size = 24 + 2 * interfaces_count;
-    for(const auto &constantPoolInfo : constant_pool) {
-        if(!constantPoolInfo)
-            continue;
-        size += constantPoolInfo->size();
-    }
-    for(const auto &fieldInfo : fields)
-        size += fieldInfo->size();
-    for(const auto &methodInfo : methods)
-        size += methodInfo->size();
-    for(const auto &attributeInfo : attributes)
-        size += attributeInfo->size();
+    for(const auto &constant_info : constant_pool)
+        size += constant_info.size();
+    for(const auto &field_info : fields)
+        size += field_info.size();
+    for(const auto &method_info : methods)
+        size += method_info.size();
+    for(const auto &attribute_info : attributes)
+        size += attribute_info.size();
     return size;
 }
 

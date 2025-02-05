@@ -2,11 +2,13 @@
 
 #include "attribute_info.h"
 
-auto ares::FieldInfo::has_access_flag(AccessFlag access_flag) const -> bool {
+using namespace ares;
+
+auto FieldInfo::has_access_flag(AccessFlag access_flag) const -> bool {
     return access_flags & access_flag;
 }
 
-auto ares::FieldInfo::size() const -> unsigned int {
+auto FieldInfo::size() const -> unsigned int {
     size_t size = 8;
     for(const auto &attribute : attributes)
         size += attribute->size();

@@ -20,8 +20,8 @@ TEST(General, Works) {
     }
 
     ares::VMCheck vmCheck;
-    for (const auto &classInfo : configuration.classes)
-        vmCheck.visit_class(*classInfo.second);
+    for (const auto &class_file : configuration.classes)
+        vmCheck.visit_class(*class_file.second);
 
     if (ares::write_jar_file(TEST_FILE_OUTPUT, configuration) == EXIT_FAILURE) {
         std::cerr << "Failed to write the file" << std::endl;

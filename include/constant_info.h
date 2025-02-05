@@ -100,8 +100,8 @@ public:
     [[nodiscard]] auto size() const -> unsigned int;
 
 public:
+    ConstantTag tag{UNDEFINED};
     ConstantInfo info{};
-    ConstantTag tag{};
 };
 
 } // namespace ares

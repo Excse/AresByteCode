@@ -17,7 +17,7 @@ class MethodInfo;
 
 class FieldInfo;
 
-class ClassInfo {
+class ClassFile {
 public:
     enum AccessFlag : uint16_t {
         PUBLIC = 0x0001,
@@ -65,18 +65,18 @@ public:
     uint16_t major_version{};
     ClassVersion class_version{};
     uint16_t constant_pool_count{};
-    std::vector <std::shared_ptr<ConstantPoolInfo>> constant_pool{};
+    std::vector <ConstantPoolInfo> constant_pool{};
     uint16_t access_flags{};
     uint16_t this_class{};
     uint16_t super_class{};
     uint16_t interfaces_count{};
     std::vector <uint16_t> interfaces{};
     uint16_t fields_count{};
-    std::vector <std::shared_ptr<FieldInfo>> fields{};
+    std::vector <FieldInfo> fields{};
     uint16_t method_count{};
-    std::vector <std::shared_ptr<MethodInfo>> methods{};
+    std::vector <MethodInfo> methods{};
     uint16_t attributes_count{};
-    std::vector <std::shared_ptr<AttributeInfo>> attributes{};
+    std::vector <AttributeInfo> attributes{};
 };
 
 } // namespace ares

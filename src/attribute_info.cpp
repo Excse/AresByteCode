@@ -1,7 +1,9 @@
 #include "attribute_info.h"
 
-auto ares::AttributeInfo::size() const -> unsigned int {
-    return 6 + info.size();
+using namespace ares;
+
+auto AttributeInfo::size() const -> unsigned int {
+    return 6 + attribute_length;
 }
 
 //==============================================================================

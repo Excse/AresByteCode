@@ -1,9 +1,10 @@
 #include "constant_info.h"
 
-auto ares::ConstantPoolInfo::size() const -> unsigned int {
+using namespace ares;
+
+auto ConstantPoolInfo::size() const -> unsigned int {
     switch (tag) {
-        case UTF_8:
-            return 3 + info.utf8_info.length;
+        case UTF_8: return 3 + info.utf8_info.length;
         case INTEGER:
         case FLOAT:
         case FIELD_REF:
@@ -11,21 +12,17 @@ auto ares::ConstantPoolInfo::size() const -> unsigned int {
         case INTERFACE_METHOD_REF:
         case NAME_AND_TYPE:
         case DYNAMIC:
-        case INVOKE_DYNAMIC:
-            return 5;
+        case INVOKE_DYNAMIC: return 5;
         case LONG:
-        case DOUBLE:
-            return 9;
+        case DOUBLE: return 9;
         case STRING:
         case CLASS:
         case METHOD_TYPE:
         case MODULE:
-        case PACKAGE:
-            return 3;
-        case METHOD_HANDLE:
-            return 4;
-        default:
-            abort();
+        case PACKAGE: return 3;
+        case METHOD_HANDLE: return 4;
+        case UNDEFINED: return 0;
+        default: abort();
     }
 }
 
