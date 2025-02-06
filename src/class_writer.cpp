@@ -156,7 +156,7 @@ auto ClassWriter::write_u8(uint8_t &data, ClassFile &class_file) -> bool {
         return false;
     }
 
-    class_file.byte_code[_offset++] = data & 0xFF;
+    _byte_code[_offset++] = data & 0xFF;
 
     return true;
 }
@@ -167,8 +167,8 @@ auto ClassWriter::write_u16(uint16_t &data, ClassFile &class_file) -> bool {
         return false;
     }
 
-    class_file.byte_code[_offset++] = (data >> 8) & 0xFF;
-    class_file.byte_code[_offset++] = data & 0xFF;
+    _byte_code[_offset++] = (data >> 8) & 0xFF;
+    _byte_code[_offset++] = data & 0xFF;
 
     return true;
 }
@@ -179,10 +179,10 @@ auto ClassWriter::write_u32(uint32_t &data, ClassFile &class_file) -> bool {
         return false;
     }
 
-    class_file.byte_code[_offset++] = (data >> 24) & 0xFF;
-    class_file.byte_code[_offset++] = (data >> 16) & 0xFF;
-    class_file.byte_code[_offset++] = (data >> 8) & 0xFF;
-    class_file.byte_code[_offset++] = data & 0xFF;
+    _byte_code[_offset++] = (data >> 24) & 0xFF;
+    _byte_code[_offset++] = (data >> 16) & 0xFF;
+    _byte_code[_offset++] = (data >> 8) & 0xFF;
+    _byte_code[_offset++] = data & 0xFF;
 
     return true;
 }
