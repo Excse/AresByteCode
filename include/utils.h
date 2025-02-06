@@ -5,30 +5,36 @@
 #include <vector>
 #include <memory>
 
+#include <zip.h>
+
 #include "class_file.h"
 
 namespace ares {
 
 class Manifest {
 public:
+    static auto read_manifest(std::string &content) -> Manifest;
+
     [[nodiscard]] auto content() const -> std::string;
 
 public:
     std::unordered_map <std::string, std::string> data{};
 };
 
-class Configuration {
+class JARFile {
 public:
-    std::unordered_map <std::string, std::shared_ptr<ClassFile>> classes{};
+    static auto read_file(const std::string &path) -> JARFile;
+
+    auto write_file(const std::string &path) -> void;
+
+private:
+    static void _add_to_zip(zip_t *zip, const std::string &file_name, const std::vector<uint8_t> &data);
+
+public:
     std::unordered_map <std::string, std::vector<uint8_t>> others{};
+    std::unordered_map <std::string, ClassFile> classes{};
     Manifest manifest{};
 };
-
-auto read_manifest(std::string &content) -> Manifest;
-
-auto read_jar_file(const std::string &path, Configuration &configuration) -> int;
-
-auto write_jar_file(const std::string &path, const Configuration &configuration) -> int;
 
 } // namespace ares
 

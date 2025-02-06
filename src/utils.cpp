@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include <boost/algorithm/string.hpp>
-#include <zip.h>
 
 #include "class_reader.h"
 #include "class_writer.h"
@@ -20,7 +19,7 @@ auto Manifest::content() const -> std::string {
     return content.str();
 }
 
-auto ares::read_manifest(std::string &content) -> Manifest {
+auto Manifest::read_manifest(std::string &content) -> Manifest {
     std::istringstream stream(content);
     std::string line;
 
@@ -51,10 +50,9 @@ auto ares::read_manifest(std::string &content) -> Manifest {
     return manifest;
 }
 
-auto ares::read_jar_file(const std::string &path, Configuration &configuration) -> int {
+auto JARFile::read_file(const std::string &path) -> JARFile {
     if (!boost::algorithm::iends_with(path, ".jar")) {
-        std::cerr << "You can only enter \".jar\" files." << std::endl;
-        return EXIT_FAILURE;
+        throw std::invalid_argument("Warning: You can only enter \".jar\" files.");
     }
 
     int error = 0;
@@ -63,10 +61,13 @@ auto ares::read_jar_file(const std::string &path, Configuration &configuration) 
     if (!zip) {
         zip_error_t zip_error;
         zip_error_init_with_code(&zip_error, error);
-        std::cerr << zip_error_strerror(&zip_error) << std::endl;
+        std::string error_message = zip_error_strerror(&zip_error);
         zip_error_fini(&zip_error);
-        return EXIT_FAILURE;
+
+        throw std::runtime_error("Warning: Couldn't open the ZIP File: " + error_message);
     }
+
+    JARFile jar_file;
 
     zip_int64_t entries = zip_get_num_entries(zip, 0);
     for (zip_int64_t index = 0; index < entries; index++) {
@@ -78,130 +79,107 @@ auto ares::read_jar_file(const std::string &path, Configuration &configuration) 
         zip_stat_t stat;
         zip_stat_init(&stat);
         if (zip_stat(zip, name.c_str(), 0, &stat) != 0) {
-            std::cerr << "Warning: Failed to retrieve ZIP entry info for: " << name << "\n";
-            continue;
+            throw std::runtime_error("Warning: Failed to retrieve ZIP entry info for: " + name);
         }
 
         auto data = std::vector<uint8_t>(stat.size);
         zip_file_t *file = zip_fopen(zip, name.c_str(), 0);
         if (!file) {
-            std::cerr << "Warning: Failed to open file in ZIP: " << name << "\n";
-            continue;
+            throw std::runtime_error("Warning: Failed to open file in ZIP: " + name);
         }
 
-        if (zip_fread(file, data.data(), stat.size) < 0) {
-            std::cerr << "Warning: Failed to read file from ZIP: " << name << "\n";
-            zip_fclose(file);
-            continue;
-        }
-
+        auto read = zip_fread(file, data.data(), stat.size);
         zip_fclose(file);
+
+        if (read < 0) {
+            throw std::runtime_error("Failed to read data from ZIP file: " + name);
+        }
 
         if (name == "META-INF/MANIFEST.MF") {
             auto content = std::string(reinterpret_cast<char *>(data.data()), stat.size);
-            auto manifest = read_manifest(content);
-            configuration.manifest = manifest;
+            jar_file.manifest = Manifest::read_manifest(content);
         } else if (boost::algorithm::iends_with(name, ".class")) {
-            auto class_file = std::make_shared<ClassFile>();
-            class_file->byte_code = std::move(data);
-
-            configuration.classes.emplace(name, class_file);
+            ClassFile class_file;
+            class_file.byte_code = std::move(data);
 
             ClassReader classReader;
-            classReader.visit_class(*class_file);
+            classReader.visit_class(class_file);
+            assert(classReader.offset() == stat.size);
 
-            if (classReader.offset() != stat.size) {
-                std::cerr << "The offset after reading the class doesn't match the class size" << std::endl;
-                return EXIT_FAILURE;
-            }
+            jar_file.classes.emplace(name, class_file);
         } else {
-            configuration.others.emplace(name, std::move(data));
+            jar_file.others.emplace(name, std::move(data));
         }
     }
 
     zip_close(zip);
 
-    return EXIT_SUCCESS;
+    return jar_file;
 }
 
-auto ares::write_jar_file(const std::string &path, const Configuration &configuration) -> int {
+auto JARFile::write_file(const std::string &path) -> void {
     if (!boost::algorithm::iends_with(path, ".jar")) {
-        std::cerr << "You can only enter \".jar\" files." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Warning: You can only enter \".jar\" files.");
     }
 
-    if (std::filesystem::exists(path))
+    if (std::filesystem::exists(path)) {
         std::filesystem::remove(path);
+    }
 
-    auto error = 0;
-    auto zip = zip_open(path.c_str(), ZIP_CREATE, &error);
+    int error = 0;
+    zip_t *zip = zip_open(path.c_str(), ZIP_CREATE | ZIP_TRUNCATE, &error);
+
     if (!zip) {
-        zip_error_t zipError;
-        zip_error_init_with_code(&zipError, error);
-        std::cerr << zip_error_strerror(&zipError) << std::endl;
-        return EXIT_FAILURE;
+        zip_error_t zip_error;
+        zip_error_init_with_code(&zip_error, error);
+        std::string error_message = zip_error_strerror(&zip_error);
+        zip_error_fini(&zip_error);
+
+        throw std::runtime_error("Warning: Couldn't create the ZIP File: " + error_message);
     }
 
-    std::vector<uint8_t *> releaseHeap;
-    for (const auto &class_file : configuration.classes) {
-        ClassWriter classWriter;
-        classWriter.visit_class(*class_file.second);
+    for (auto &class_file: classes) {
+        ClassWriter writer;
+        writer.visit_class(class_file.second);
 
-        auto stackByteCode = classWriter.byte_code();
-        auto classSize = class_file.second->size();
-
-        auto heapByteCode = new uint8_t[classSize];
-        for (size_t index = 0; index < classSize; index++) {
-            heapByteCode[index] = stackByteCode[index];
-        }
-        releaseHeap.push_back(heapByteCode);
-
-        auto source = zip_source_buffer(zip, heapByteCode, classSize, 0);
-        if (source == nullptr) {
-            std::cerr << zip_strerror(zip) << std::endl;
-            return EXIT_FAILURE;
-        }
-
-        if (zip_file_add(zip, class_file.first.c_str(), source, ZIP_FL_UNCHANGED) < 0) {
-            zip_source_free(source);
-            std::cerr << zip_strerror(zip) << std::endl;
-            return EXIT_FAILURE;
-        }
+        auto &byte_code = writer.byte_code();
+        _add_to_zip(zip, class_file.first, byte_code);
     }
 
-    for (const auto &other : configuration.others) {
-        auto source = zip_source_buffer(zip, other.second.data(), other.second.size(), 0);
-        if (source == nullptr) {
-            std::cerr << zip_strerror(zip) << std::endl;
-            return EXIT_FAILURE;
-        }
-
-        if (zip_file_add(zip, other.first.c_str(), source, ZIP_FL_UNCHANGED) < 0) {
-            zip_source_free(source);
-            std::cerr << zip_strerror(zip) << std::endl;
-            return EXIT_FAILURE;
-        }
+    for (auto &item: others) {
+        _add_to_zip(zip, item.first, item.second);
     }
 
-    auto manifest = configuration.manifest.content();
-    auto source = zip_source_buffer(zip, manifest.data(), manifest.size(), 0);
-    if (source == nullptr) {
-        std::cerr << zip_strerror(zip) << std::endl;
-        return EXIT_FAILURE;
+    auto manifest_content = manifest.content();
+    std::vector<uint8_t> content(manifest_content.begin(), manifest_content.end());
+
+    _add_to_zip(zip, "META-INF/MANIFEST.MF", content);
+
+    if (zip_close(zip) < 0) {
+        throw std::runtime_error("Warning: Failed to close the ZIP archive.");
+    }
+}
+
+void JARFile::_add_to_zip(zip_t *zip, const std::string &file_name, const std::vector<uint8_t> &data) {
+    // Weird workaround. zip_file_add is not directly using the data and instead stores it until zip_close is being called.
+    // The problem is that data is not always present (like generating bytecode using ClassWriter in a for loop).
+    auto *data_copy = new uint8_t[data.size()];
+    if (!data.empty()) {
+        std::memcpy(data_copy, data.data(), data.size());
     }
 
-    if (zip_file_add(zip, "META-INF/MANIFEST.MF", source, ZIP_FL_UNCHANGED) < 0) {
+    zip_source_t *source = zip_source_buffer(zip, data_copy, data.size(), 0);
+    if (!source) {
+        std::string error_message = zip_strerror(zip);
+        throw std::runtime_error("Warning: Error creating source: " + error_message);
+    }
+
+    if (zip_file_add(zip, file_name.c_str(), source, ZIP_FL_OVERWRITE) < 0) {
         zip_source_free(source);
-        std::cerr << zip_strerror(zip) << std::endl;
-        return EXIT_FAILURE;
+
+        std::string error_message = zip_strerror(zip);
+        throw std::runtime_error("Warning: Error adding file to zip: " + error_message);
     }
-
-    zip_close(zip);
-
-    for(const auto &release : releaseHeap)
-        delete [] release;
-
-    return EXIT_SUCCESS;
 }
 
 //==============================================================================

@@ -63,7 +63,7 @@ add_library(${PROJECT_NAME}_lib
         src/vm_check.cpp
         src/class_writer.cpp)
 
-target_link_libraries(${PROJECT_NAME}_lib PRIVATE zip Boost::boost)
+target_link_libraries(${PROJECT_NAME}_lib zip Boost::boost)
 
 # =====================
 # Tests

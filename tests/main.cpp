@@ -7,26 +7,19 @@
 #include "vm_check.h"
 #include "utils.h"
 
-static const std::string TEST_FILE_OUTPUT = TEST_PATH "/resources/hello_world_out.jar";
-static const std::string TEST_FILE_INPUT = TEST_PATH "/resources/hello_world_in.jar";
+using namespace ares;
 
 TEST(General, Works) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    ares::Configuration configuration{};
-    if (ares::read_jar_file(TEST_FILE_INPUT, configuration) == EXIT_FAILURE) {
-        std::cerr << "Failed to read the file" << std::endl;
-        exit(EXIT_FAILURE);
+    auto file = JARFile::read_file(TEST_PATH "/resources/hello_world_in.jar");
+
+    VMCheck vmCheck;
+    for (auto &class_file: file.classes) {
+        vmCheck.visit_class(class_file.second);
     }
 
-    ares::VMCheck vmCheck;
-    for (const auto &class_file : configuration.classes)
-        vmCheck.visit_class(*class_file.second);
-
-    if (ares::write_jar_file(TEST_FILE_OUTPUT, configuration) == EXIT_FAILURE) {
-        std::cerr << "Failed to write the file" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    file.write_file(TEST_PATH "/resources/hello_world_out.jar");
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
